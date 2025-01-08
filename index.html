@@ -31,32 +31,46 @@
     </ul>
 
     <script>
-        function checkRequirements() {
-            let result = "Všechny požadavky jsou splněny!";
-            let androidCheck = document.getElementById("androidCheck");
-            
-            // Kontrola verze Androidu
-            let userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            if (/android/i.test(userAgent)) {
-                let androidVersion = parseFloat(userAgent.match(/Android\s([0-9\.]*)/)[1]);
-                if (androidVersion >= 10) {
-                    androidCheck.innerHTML = "✔️";
-                    androidCheck.classList.add("checkmark");
-                } else {
-                    result = "Požadavek na Android 10 nebo vyšší není splněn.";
-                    androidCheck.innerHTML = "";
-                    androidCheck.classList.remove("checkmark");
-                }
-                document.getElementById("androidVersion").innerText = "Verze Androidu: " + androidVersion;
+   function checkRequirements() {
+    let result = "Všechny požadavky jsou splněny!";
+    let androidCheck = document.getElementById("androidCheck");
+
+    try {
+        let userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        if (/android/i.test(userAgent)) {
+            let match = userAgent.match(/Android\s([0-9\.]*)/);
+            let androidVersion = match ? parseFloat(match[1]) : null;
+
+            if (androidVersion && androidVersion >= 10) {
+                androidCheck.innerHTML = "✔️";
+                androidCheck.classList.add("checkmark");
+            } else if (androidVersion) {
+                result = "Požadavek na Android 10 nebo vyšší není splněn.";
+                androidCheck.innerHTML = "❌";
+                androidCheck.classList.remove("checkmark");
             } else {
-                result = "Zařízení není Android.";
-                document.getElementById("androidVersion").innerText = "";
-                androidCheck.innerHTML = "";
+                result = "Verzi Androidu nebylo možné zjistit.";
+                androidCheck.innerHTML = "❓";
                 androidCheck.classList.remove("checkmark");
             }
 
-            document.getElementById("result").innerText = result;
+            document.getElementById("androidVersion").innerText = androidVersion
+                ? "Verze Androidu: " + androidVersion
+                : "Android detekován, ale verze neznámá.";
+        } else {
+            result = "Zařízení není Android.";
+            androidCheck.innerHTML = "❌";
+            androidCheck.classList.remove("checkmark");
+            document.getElementById("androidVersion").innerText = "";
         }
+    } catch (error) {
+        result = "Došlo k chybě při kontrole požadavků: " + error.message;
+    }
+
+    document.getElementById("result").innerText = result;
+}
+
 
         function displayDeviceInfo() {
             let userAgent = navigator.userAgent || navigator.vendor || window.opera;
