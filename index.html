@@ -1,0 +1,86 @@
+Jasně, tady je aktualizovaný kód s přejmenovaným tlačítkem na "Kontrola Android":
+
+```html
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrola požadavků pro OKbase</title>
+</head>
+<body>
+    <h1>Kontrola požadavků pro OKbase</h1>
+    <ul>
+        <li>140MB volného místa</li>
+        <li>Android 10 nebo vyšší</li>
+        <li>Aplikaci Microsoft Edge</li>
+        <li>Aplikaci Portál společnosti</li>
+        <li>Zámek obrazovky</li>
+    </ul>
+    <button onclick="checkRequirements()">Kontrola Android</button>
+    <p id="result"></p>
+    <h2>Informace o zařízení:</h2>
+    <ul>
+        <li id="os"></li>
+        <li id="browser"></li>
+        <li id="screen"></li>
+    </ul>
+
+    <script>
+        function checkRequirements() {
+            let result = "Všechny požadavky jsou splněny!";
+            
+            // Kontrola verze Androidu
+            let userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(userAgent)) {
+                let androidVersion = parseFloat(userAgent.match(/Android\s([0-9\.]*)/)[1]);
+                if (androidVersion < 10) {
+                    result = "Požadavek na Android 10 nebo vyšší není splněn.";
+                }
+            } else {
+                result = "Zařízení není Android.";
+            }
+
+            document.getElementById("result").innerText = result;
+        }
+
+        function displayDeviceInfo() {
+            let userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            let os = "Neznámý OS";
+            let browser = "Neznámý prohlížeč";
+
+            if (/windows phone/i.test(userAgent)) {
+                os = "Windows Phone";
+            } else if (/android/i.test(userAgent)) {
+                os = "Android";
+            } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                os = "iOS";
+            } else if (/Macintosh/.test(userAgent)) {
+                os = "Mac OS";
+            } else if (/Windows/.test(userAgent)) {
+                os = "Windows";
+            } else if (/Linux/.test(userAgent)) {
+                os = "Linux";
+            }
+
+            if (/chrome/i.test(userAgent) && !/edge/i.test(userAgent)) {
+                browser = "Google Chrome";
+            } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
+                browser = "Safari";
+            } else if (/firefox/i.test(userAgent)) {
+                browser = "Mozilla Firefox";
+            } else if (/msie|trident/i.test(userAgent)) {
+                browser = "Internet Explorer";
+            } else if (/edge/i.test(userAgent)) {
+                browser = "Microsoft Edge";
+            }
+
+            document.getElementById("os").innerText = "Operační systém: " + os;
+            document.getElementById("browser").innerText = "Prohlížeč: " + browser;
+            document.getElementById("screen").innerText = "Rozlišení obrazovky: " + window.screen.width + "x" + window.screen.height;
+        }
+
+        displayDeviceInfo();
+    </script>
+</body>
+</html> 
