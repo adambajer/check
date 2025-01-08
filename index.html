@@ -1,106 +1,130 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKbase</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        @media (max-width: 600px) {
-            body {
-                font-size: 14px;
-            }
-        }
-        .status {
-            font-weight: bold;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 5px;
-        }
-        a {
-            display: inline-block;
-            margin-top: 10px;
-            text-decoration: none;
-            color: #1a73e8;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OKbase na zařízení</title>
+  <style>
+    body {
+      margin: 1rem;
+      font-family: sans-serif;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    /* Vizuální značení */
+    .mark {
+      font-weight: bold;
+    }
+    .ok {
+      color: green;     /* pro Edge, je-li detekován => "✔️" */
+    }
+    .unknown {
+      color: orange;    /* "?" */
+    }
+    /* Responzivita */
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.95rem;
+      }
+      h1 {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1 id="os-heading">OKbase na zařízení</h1>
-    <ul id="os-details"></ul>
-    <p>Microsoft Edge: <span id="edge-status">?</span></p>
-    <p>Portál společnosti: ?</p>
-    <div>
-        <a href="#" id="download-link">Stáhnout aplikaci</a>
-    </div>
-    <div>
-        <a href="https://okbase2.miele.com/" id="okbase-link">Přejít na OKbase</a>
-    </div>
 
-    <script>
-        (function() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            let os = "Neznámé";
+<h1 id="headline"></h1>
 
-            if (/android/i.test(userAgent)) {
-                os = "Android";
-            } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
-                os = "Apple";
-            } else if (/Windows/i.test(userAgent)) {
-                os = "Windows";
-            }
+<!-- Pouze u Androidu zobrazíme 2 řádky (verze, volné místo), jinde hidden -->
+<div id="androidExtra" style="display: none;">
+  <ul>
+    <li>Minimální verze Android 10: <span class="mark unknown">?</span></li>
+    <li>Volné místo 140 MB: <span class="mark unknown">?</span></li>
+  </ul>
+</div>
 
-            // Nastavení nadpisu podle OS
-            const osHeading = document.getElementById('os-heading');
-            osHeading.textContent = `OKbase na zařízení ${os}`;
+<!-- Pro všechny OS: Edge a Portál společnosti -->
+<ul>
+  <li>Microsoft Edge: 
+    <span id="edgeMark" class="mark unknown">?</span>
+    <!-- Kdybychom chtěli v budoucnu link, přidali bychom ho sem. -->
+  </li>
+  <li>Portál společnosti: 
+    <span class="mark unknown">?</span>
+    <!-- Link, liší se dle OS → doplníme v JS -->
+    <span id="companyLink" style="display: inline;">
+      – <a id="companyLinkA" href="#" target="_blank">Stáhnout Portál společnosti</a>
+    </span>
+  </li>
+</ul>
 
-            // Přidání specifických detailů pro OS
-            const osDetails = document.getElementById('os-details');
-            if (os === "Android") {
-                const li1 = document.createElement('li');
-                li1.textContent = "Minimální verze Android 10: ?";
-                osDetails.appendChild(li1);
+<!-- Odkaz OKbase vždy -->
+<div>
+  <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
+</div>
 
-                const li2 = document.createElement('li');
-                li2.textContent = "Volné místo 140 MB: ?";
-                osDetails.appendChild(li2);
-            }
+<script>
+// 1) Rozlišení OS
+function detectOS() {
+  const ua = navigator.userAgent;
+  if (/android/i.test(ua)) return "Android";
+  if (/iPad|iPhone|iPod/.test(ua)) return "Apple";
+  if (/Windows/i.test(ua)) return "Windows";
+  return "Neznámé";
+}
 
-            // Detekce Microsoft Edge
-            const edgeStatus = document.getElementById('edge-status');
-            const isEdge = /Edg\/\d+/i.test(userAgent);
-            edgeStatus.textContent = isEdge ? "✔️" : "?";
+// 2) Detekce Edge
+async function isEdgeBrowser() {
+  // Novější brand info
+  if (navigator.userAgentData && navigator.userAgentData.brands) {
+    const brands = navigator.userAgentData.brands.map(b => b.brand.toLowerCase());
+    return brands.includes('microsoft edge');
+  }
+  // Fallback
+  return /Edg\//i.test(navigator.userAgent);
+}
 
-            // Portál společnosti - vždy ?
-            // Již zobrazeno jako ?
+document.addEventListener('DOMContentLoaded', async () => {
+  const headline       = document.getElementById('headline');
+  const androidExtra   = document.getElementById('androidExtra');
+  const edgeMark       = document.getElementById('edgeMark');
+  const companyLinkA   = document.getElementById('companyLinkA');
 
-            // Nastavení odkazu ke stažení na základě OS
-            const downloadLink = document.getElementById('download-link');
-            switch(os) {
-                case "Android":
-                    downloadLink.href = "https://play.google.com/store/apps/details?id=your.app.id";
-                    downloadLink.textContent = "Stáhnout z Google Play";
-                    break;
-                case "Apple":
-                    downloadLink.href = "https://apps.apple.com/app/your-app-id";
-                    downloadLink.textContent = "Stáhnout z App Store";
-                    break;
-                case "Windows":
-                    downloadLink.href = "https://www.microsoft.com/store/apps/your-app-id";
-                    downloadLink.textContent = "Stáhnout z Microsoft Store";
-                    break;
-                default:
-                    downloadLink.href = "#";
-                    downloadLink.textContent = "Stáhnout aplikaci";
-            }
-        })();
-    </script>
+  // 3) Určím OS => nadpis + jestli zobrazit androidExtra
+  const os = detectOS();
+  if (os === "Android") {
+    headline.textContent = "OKbase na zařízení Android";
+    androidExtra.style.display = "block";
+    // Portál link => Google Play
+    companyLinkA.href = "https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal";
+
+  } else if (os === "Apple") {
+    headline.textContent = "OKbase na zařízení Apple";
+    // Portál link => iOS App Store
+    companyLinkA.href = "https://apps.apple.com/us/app/intune-company-portal/id719725942";
+
+  } else if (os === "Windows") {
+    headline.textContent = "OKbase na zařízení Windows";
+    // Portál link => Microsoft Store
+    companyLinkA.href = "https://apps.microsoft.com/store/detail/intune-company-portal/9WZDNCRFJ3PZ";
+
+  } else {
+    headline.textContent = "OKbase na neznámém zařízení";
+    // Portál link => nic moc
+    companyLinkA.href = "#";
+  }
+
+  // 4) Microsoft Edge => "✔️" / "?"
+  const isEdge = await isEdgeBrowser();
+  if (isEdge) {
+    edgeMark.textContent = "✔️";
+    edgeMark.classList.remove("unknown");
+    edgeMark.classList.add("ok");
+  }
+});
+</script>
+
 </body>
 </html>
