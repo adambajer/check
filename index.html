@@ -1,233 +1,174 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OKbase na zařízení</title>
   <style>
-    .checkmark {
-      color: green;
-      font-weight: bold;
+    body {
+      margin: 1rem;
+      font-family: sans-serif;
     }
-    .error {
-      color: red;
-      font-weight: bold;
+    h1 {
+      margin-bottom: 1rem;
     }
-    .unknown {
+    .unknownMark {
+      font-weight: bold;
       color: orange;
-      font-weight: bold;
+    }
+    #appLinks {
+      margin: 1rem 0;
+    }
+    /* Responzivní – základ: nic speciálního, 
+       jen se to přizpůsobí šířce */
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.95rem;
+      }
+      h1 {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
 <body>
 
 <h1 id="headline"></h1>
-<!-- Nadpis: 
-     "OKbase na zařízení Android" / 
-     "OKbase na zařízení Apple" /
-     "OKbase na zařízení Windows" 
--->
 
 <ul>
-  <li>Microsoft Edge: <span id="edgeCheck"></span></li>
-  <li>Portál společnosti: <span id="companyCheck"></span></li>
+  <!-- Pro Android: Minimální verze 10 => "?" 
+       Volné místo 140MB => "?" 
+       (Pro Apple/Windows se to zobrazí, ale třeba "N/A" nebo tak)
+  -->
+  <li>Minimální verze Android: <span id="androidVer" class="unknownMark">?</span></li>
+  <li>Volné místo 140 MB: <span id="storage" class="unknownMark">?</span></li>
+
+  <li>Microsoft Edge: <span id="edgeMark" class="unknownMark">?</span>
+      <span id="edgeLink" style="display:none;">
+        – <a id="edgeLinkA" href="#" target="_blank">Stáhnout Edge</a>
+      </span>
+  </li>
+  <li>Portál společnosti: <span class="unknownMark">?</span>
+      <span id="companyLink" style="display:inline;">
+        – <a id="companyLinkA" href="#" target="_blank">Stáhnout Portál společnosti</a>
+      </span>
+  </li>
 </ul>
 
-<!-- Odkazy ke stažení, zobrazené jen pokud je potřeba -->
 <div id="appLinks" style="display:none;">
-  <p>Doporučené aplikace:</p>
-  <ul>
-    <li id="edgeLink" style="display:none;">
-      <a id="edgeLinkA" href="#" target="_blank">Stáhnout Microsoft Edge</a>
-    </li>
-    <li id="companyLink" style="display:none;">
-      <a id="companyLinkA" href="#" target="_blank">Stáhnout Portál společnosti</a>
-    </li>
-  </ul>
+  <p>Aplikace ke stažení:</p>
+  <!-- Zde můžeme vypsat linky na store, 
+       ale níže to řešíme buď "edgeLink" / "companyLink" -->
 </div>
 
-<!-- Odkaz na OKbase, zobrazíme jen pokud je vše O.K. (?) 
-     Případně ho zobrazíme vždy, je to na vás. 
--->
-<div id="okbaseLink" style="display:none;">
+<!-- Odkaz na OKbase vždy -->
+<div id="okbaseLink">
   <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
 </div>
 
 <script>
-// Detekce OS
+// 1) Rozlišení OS
 function detectOS() {
   const ua = navigator.userAgent;
-
-  if (/android/i.test(ua)) {
-    return "Android";
-  } else if (/iPad|iPhone|iPod/.test(ua)) {
-    return "Apple";
-  } else if (/Windows/i.test(ua)) {
-    return "Windows";
-  }
-  return "Neznámé";
+  if (/android/i.test(ua)) return 'Android';
+  if (/iPad|iPhone|iPod/.test(ua)) return 'Apple';
+  if (/Windows/i.test(ua)) return 'Windows';
+  return 'Neznámé';
 }
 
-// Asynchronní zjištění, zda je to Edge
+// 2) Detekce Edge
 async function isEdgeBrowser() {
-  // Moderní brand info:
   if (navigator.userAgentData && navigator.userAgentData.brands) {
     const brands = navigator.userAgentData.brands.map(b => b.brand.toLowerCase());
     return brands.includes('microsoft edge');
   }
-  // Fallback:
   return /Edg\//i.test(navigator.userAgent);
 }
 
-// Stejně pro Portál společnosti, v reálu to nelze v prohlížeči zjistit,
-// tak buď "není", a nabídneme link vždy, 
-// nebo to necháme jen symbolicky. 
-// Zde to "fake" => always false => dáme odkaz.
-async function hasCompanyPortal() {
-  // Nelze spolehlivě zjistit, předpokládáme false:
-  return false;
+// 3) Zjištění verze Androidu (vrací number nebo undefined)
+function getAndroidVersion() {
+  const match = navigator.userAgent.match(/Android\s+([\d\.]+)/i);
+  if (match) {
+    return parseFloat(match[1]) || undefined;
+  }
+  return undefined;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const headline   = document.getElementById('headline');
-  const edgeCheck  = document.getElementById('edgeCheck');
-  const compCheck  = document.getElementById('companyCheck');
-  const appLinks   = document.getElementById('appLinks');
-  const edgeLink   = document.getElementById('edgeLink');
-  const edgeLinkA  = document.getElementById('edgeLinkA');
-  const companyLink= document.getElementById('companyLink');
+  const headline    = document.getElementById('headline');
+  const androidVer  = document.getElementById('androidVer');
+  const storageElem = document.getElementById('storage');
+
+  const edgeMark    = document.getElementById('edgeMark');
+  const edgeLink    = document.getElementById('edgeLink');
+  const edgeLinkA   = document.getElementById('edgeLinkA');
+
+  const companyLink = document.getElementById('companyLink');
   const companyLinkA= document.getElementById('companyLinkA');
-  const okbaseLink = document.getElementById('okbaseLink');
 
+  const appLinks    = document.getElementById('appLinks');
+
+  // Detekce OS
   const os = detectOS();
-  let allOk = true;
 
-  // Nadpis
-  if (os === "Android") {
-    headline.textContent = "OKbase na zařízení Android";
-    // Edge pro Android?
-    const isEdge = await isEdgeBrowser();
-    if (isEdge) {
-      edgeCheck.innerHTML = "✔️";
-      edgeCheck.classList.add("checkmark");
-    } else {
-      edgeCheck.innerHTML = "❌ (chybí Edge)";
-      edgeCheck.classList.add("error");
-      edgeLink.style.display = "list-item";
-      // Odkaz do Google Play na Edge:
-      edgeLinkA.href = "https://play.google.com/store/apps/details?id=com.microsoft.emmx";
-      allOk = false;
-    }
+  // Nastavit nadpis:
+  if (os === 'Android') {
+    headline.textContent = 'OKbase na zařízení Android';
 
-    // Portál společnosti
-    const hasPortal = await hasCompanyPortal(); // false => odkaz
-    if (hasPortal) {
-      compCheck.innerHTML = "✔️";
-      compCheck.classList.add("checkmark");
-    } else {
-      compCheck.innerHTML = "❌ (chybí Portál společnosti)";
-      compCheck.classList.add("error");
-      companyLink.style.display = "list-item";
-      // Odkaz do Google Play na Company Portal
-      companyLinkA.href = "https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal";
-      allOk = false;
+    // Minimální verze 10 => jen ukážeme "?"
+    const ver = getAndroidVersion();
+    // Kdybychom to chtěli nějak vypisovat:
+    if (ver && ver < 10) {
+      // jen otazník => nic víc
     }
+    // Linky pro Edge + Portál do Google Play
+    edgeLinkA.href     = 'https://play.google.com/store/apps/details?id=com.microsoft.emmx';
+    companyLinkA.href  = 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal';
 
-    // Zobrazíme <div> s links, pokud aspoň něco chybí
-    if (!allOk) {
-      appLinks.style.display = "block";
-    }
-    // Jestli allOk => zobrazíme OKbase link
-    if (allOk) {
-      okbaseLink.style.display = "block";
-    }
+  } else if (os === 'Apple') {
+    headline.textContent = 'OKbase na zařízení Apple';
+    // Minimální verze Android => N/A, storage => "?"
+    // Odkazy -> iOS App Store
+    edgeLinkA.href     = 'https://apps.apple.com/us/app/microsoft-edge-web-browser/id1288723196';
+    companyLinkA.href  = 'https://apps.apple.com/us/app/intune-company-portal/id719725942';
 
-  } else if (os === "Apple") {
-    headline.textContent = "OKbase na zařízení Apple (iOS)";
+  } else if (os === 'Windows') {
+    headline.textContent = 'OKbase na zařízení Windows';
 
-    // Edge pro iOS?
-    const isEdge = await isEdgeBrowser();
-    if (isEdge) {
-      edgeCheck.innerHTML = "✔️";
-      edgeCheck.classList.add("checkmark");
-    } else {
-      edgeCheck.innerHTML = "❌ (chybí Edge)";
-      edgeCheck.classList.add("error");
-      edgeLink.style.display = "list-item";
-      // Odkaz do App Store na Edge
-      edgeLinkA.href = "https://apps.apple.com/us/app/microsoft-edge-web-browser/id1288723196";
-      allOk = false;
-    }
-
-    // Portál společnosti
-    const hasPortal = await hasCompanyPortal();
-    if (hasPortal) {
-      compCheck.innerHTML = "✔️";
-      compCheck.classList.add("checkmark");
-    } else {
-      compCheck.innerHTML = "❌ (chybí Portál společnosti)";
-      compCheck.classList.add("error");
-      companyLink.style.display = "list-item";
-      // Odkaz do App Store Company Portal
-      companyLinkA.href = "https://apps.apple.com/us/app/intune-company-portal/id719725942";
-      allOk = false;
-    }
-
-    // Zobrazíme <div> s links, pokud aspoň něco chybí
-    if (!allOk) {
-      appLinks.style.display = "block";
-    }
-    if (allOk) {
-      okbaseLink.style.display = "block";
-    }
-
-  } else if (os === "Windows") {
-    headline.textContent = "OKbase na zařízení Windows";
-
-    // Windows => Edge jediné
-    const isEdge = await isEdgeBrowser();
-    if (isEdge) {
-      edgeCheck.innerHTML = "✔️";
-      edgeCheck.classList.add("checkmark");
-    } else {
-      edgeCheck.innerHTML = "❌ (chybí Edge)";
-      edgeCheck.classList.add("error");
-      edgeLink.style.display = "list-item";
-      // Odkaz ke stažení Edge
-      edgeLinkA.href = "https://www.microsoft.com/edge";
-      allOk = false;
-    }
-
-    // Portál společnosti? (Na Windows store existuje?)
-    const hasPortal = await hasCompanyPortal();
-    if (hasPortal) {
-      compCheck.innerHTML = "✔️";
-      compCheck.classList.add("checkmark");
-    } else {
-      compCheck.innerHTML = "❌ (chybí Portál společnosti)";
-      compCheck.classList.add("error");
-      companyLink.style.display = "list-item";
-      // Tady to moc smysl nedává, ale vyhovíme zadání
-      // Můžete dát odkaz do MS Store:
-      companyLinkA.href = "https://apps.microsoft.com/store/detail/intune-company-portal/9WZDNCRFJ3PZ";
-      allOk = false;
-    }
-
-    // Zobrazíme links
-    if (!allOk) {
-      appLinks.style.display = "block";
-    }
-    if (allOk) {
-      okbaseLink.style.display = "block";
-    }
+    // Minimální verze Android => N/A, storage => "?"
+    // Odkazy -> Edge (ms), portál společnosti (ms store):
+    edgeLinkA.href     = 'https://www.microsoft.com/edge';
+    companyLinkA.href  = 'https://apps.microsoft.com/store/detail/intune-company-portal/9WZDNCRFJ3PZ';
 
   } else {
-    // Neznámé
-    headline.textContent = "OKbase na neznámém zařízení";
-    // Edge? Asi ne
-    edgeCheck.innerHTML = "❓";
-    compCheck.innerHTML = "❓";
-    // Konec
+    headline.textContent = 'OKbase na neznámém zařízení';
+    // Edge link = up to you
+    edgeLinkA.href     = 'https://www.microsoft.com/edge';
+    // company?
+    companyLinkA.href  = '#';
   }
+
+  // 4) Edge detect => Pokud není, zobrazit link
+  const isEdge = await isEdgeBrowser();
+  if (!isEdge) {
+    // Zobrazíme link "Stáhnout Edge"
+    edgeLink.style.display = 'inline';
+    // plus appLinks
+    appLinks.style.display = 'block';
+  }
+
+  // 5) Portál společnosti => Vždy otazník => link 
+  // => je to už default "❓" a link je default on
+  // Tedy nic speciálního nepotřebujeme.
+
+  // 6) Storage => "?" (nejde zjistit)
+  // nic nepotřebujeme, už je tam otazník
+
+  // 7) Minimální verze android => "?" 
+  //  => vypsáno v HTML, done.
+
+  // 8) OKbase link => always visible
+  // => hotovo
 });
 </script>
 
