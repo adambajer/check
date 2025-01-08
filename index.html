@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKbase na zařízení Android</title>
+    <title>OKbase na zařízení</title>
     <style>
         .checkmark {
             color: green;
@@ -24,28 +24,37 @@
     </style>
 </head>
 <body>
-    <h1>OKbase na zařízení Android</h1>
+    <h1>OKbase na zařízení</h1>
     <ul>
         <li>140MB volného místa <span id="storageCheck"></span></li>
-        <li>Android 10 nebo vyšší <span id="androidCheck"></span></li>
-        <li>Aplikace Microsoft Edge <span id="edgeCheck">❓</span></li>
-        <li>Aplikace Portál společnosti <span id="companyPortalCheck">❓</span></li>
-        <li>Zámek obrazovky <span id="screenLockCheck"></span></li>
+        <li>
+          <span id="platformRequirement"></span>
+          <!-- Android => "Android 10 nebo vyšší"
+               iOS => "iOS" (klidně verzi)
+               Windows => "Microsoft Edge" 
+          -->
+          <span id="platformCheck"></span>
+        </li>
     </ul>
     <div id="appLinks" style="display: none;">
         <p>Stáhněte požadované aplikace:</p>
         <ul>
+            <!-- Jen pro Windows / Edge? Nebo jen odkaz do store? -->
             <li id="edgeLink" style="display: none;">
-                <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Stáhnout Microsoft Edge</a>
+                <a href="https://www.microsoft.com/edge" target="_blank">Stáhnout Microsoft Edge</a>
             </li>
-            <li id="companyPortalLink" style="display: none;">
-                <a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal" target="_blank">Stáhnout Portál společnosti</a>
+            <li id="iosLink" style="display: none;">
+                <a href="https://apps.apple.com/" target="_blank">Otevřít App Store</a>
+            </li>
+            <li id="androidLink" style="display: none;">
+                <a href="https://play.google.com/store" target="_blank">Otevřít Google Play</a>
             </li>
         </ul>
     </div>
     <div id="link" style="display: none;">
         <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
     </div>
+
     <h2 id="detailsHeader">Co jsem o zařízení zjistil:</h2>
     <div id="details">
         <ul>
@@ -54,93 +63,105 @@
             <li>Rozlišení obrazovky: <span id="screen"></span></li>
             <li>Verze Androidu: <span id="androidVersion">❓</span></li>
             <li>Volné místo na disku: <span id="storage">❓</span></li>
-            <li>Zámek obrazovky: <span id="screenLock">❓</span></li>
         </ul>
     </div>
 
     <script>
+        // ----------------------------------------------------------------------------
+        // 1) Funkce pro zjištění verze Androidu
+        // ----------------------------------------------------------------------------
+        function getAndroidVersion() {
+            const ua = navigator.userAgent.toLowerCase();
+            const match = ua.match(/android\s([0-9\.]*)/i);
+            return match ? parseFloat(match[1]) : undefined;
+        }
+
+        // ----------------------------------------------------------------------------
+        // 2) Zjištění, zda je prohlížeč Edge
+        //    (moderní: navigator.userAgentData.brands, fallback: /Edg\//)
+        // ----------------------------------------------------------------------------
+        async function isEdgeBrowser() {
+            if (navigator.userAgentData && navigator.userAgentData.brands) {
+                const brands = navigator.userAgentData.brands;
+                return brands.some(brand => brand.brand.toLowerCase() === 'microsoft edge');
+            }
+            return /edg\//i.test(navigator.userAgent);
+        }
+
+        // ----------------------------------------------------------------------------
+        // 3) Detekce OS a prohlížeče
+        // ----------------------------------------------------------------------------
+        function detectOS() {
+            const ua = navigator.userAgent;
+            if (/android/i.test(ua)) {
+                return "Android";
+            } else if (/windows phone/i.test(ua)) {
+                return "Windows Phone";
+            } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                return "iOS";
+            } else if (/Macintosh/.test(ua)) {
+                return "Mac OS";
+            } else if (/Windows/.test(ua)) {
+                return "Windows";
+            } else if (/Linux/.test(ua)) {
+                return "Linux";
+            }
+            return "Neznámý OS";
+        }
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            if (/Edg\//i.test(ua)) {
+                return "Microsoft Edge";
+            } else if (/chrome/i.test(ua) && !/edge/i.test(ua)) {
+                return "Google Chrome";
+            } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
+                return "Safari";
+            } else if (/firefox/i.test(ua)) {
+                return "Mozilla Firefox";
+            } else if (/msie|trident/i.test(ua)) {
+                return "Internet Explorer";
+            }
+            return "Neznámý prohlížeč";
+        }
+
+        // ----------------------------------------------------------------------------
+        // 4) Hlavní async funkce
+        // ----------------------------------------------------------------------------
         async function runCompleteTest() {
+            // references
+            const storageCheck = document.getElementById("storageCheck");
+            const platformRequirement = document.getElementById("platformRequirement");
+            const platformCheck = document.getElementById("platformCheck");
+            const osElem    = document.getElementById("os");
+            const browserElem = document.getElementById("browser");
+            const screenElem  = document.getElementById("screen");
+            const androidVerElem = document.getElementById("androidVersion");
+
+            const edgeLink        = document.getElementById("edgeLink");
+            const iosLink         = document.getElementById("iosLink");
+            const androidLink     = document.getElementById("androidLink");
+            const linkDiv         = document.getElementById("link");
+            const appLinks        = document.getElementById("appLinks");
+
+            // Detekce OS + browser
+            let os      = detectOS();
+            let browser = detectBrowser();
+
+            // Zapis do detailu
+            osElem.innerText      = os;
+            browserElem.innerText = browser;
+            screenElem.innerText  = `${window.screen.width}x${window.screen.height}`;
+
+            // Logika volného místa
+            let freeSpaceMB = 0; // default
             let allChecksPassed = true;
 
-            // Android version detection
-            function getAndroidVersion() {
-                const ua = navigator.userAgent.toLowerCase();
-                const match = ua.match(/android\s([0-9\.]*)/i);
-                return match ? parseFloat(match[1]) : undefined;
-            }
-
-            // User agent brand detection for Microsoft Edge
-            async function isEdgeBrowser() {
-                if (navigator.userAgentData && navigator.userAgentData.brands) {
-                    const brands = navigator.userAgentData.brands;
-                    return brands.some(brand => brand.brand.toLowerCase() === 'microsoft edge');
-                }
-                return /edg/i.test(navigator.userAgent);
-            }
-
-            // Detect OS and browser
-            let os = "Neznámý OS";
-            let browser = "Neznámý prohlížeč";
-
-            if (/android/i.test(navigator.userAgent)) {
-                os = "Android";
-            } else if (/windows phone/i.test(navigator.userAgent)) {
-                os = "Windows Phone";
-            } else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
-                os = "iOS";
-            } else if (/Macintosh/.test(navigator.userAgent)) {
-                os = "Mac OS";
-            } else if (/Windows/.test(navigator.userAgent)) {
-                os = "Windows";
-            } else if (/Linux/.test(navigator.userAgent)) {
-                os = "Linux";
-            }
-
-            if (await isEdgeBrowser()) {
-                browser = "Microsoft Edge";
-            } else if (/chrome/i.test(navigator.userAgent) && !/edge/i.test(navigator.userAgent)) {
-                browser = "Google Chrome";
-            } else if (/safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent)) {
-                browser = "Safari";
-            } else if (/firefox/i.test(navigator.userAgent)) {
-                browser = "Mozilla Firefox";
-            } else if (/msie|trident/i.test(navigator.userAgent)) {
-                browser = "Internet Explorer";
-            }
-
-            document.getElementById("os").innerText = os;
-            document.getElementById("browser").innerText = browser;
-            document.getElementById("screen").innerText = `${window.screen.width}x${window.screen.height}`;
-
-            // Android version validation
-            const androidVersion = getAndroidVersion();
-            const androidCheck = document.getElementById("androidCheck");
-
-            if (os === "Android" && androidVersion) {
-                document.getElementById("androidVersion").innerText = androidVersion;
-                if (androidVersion >= 10) {
-                    androidCheck.innerHTML = "✔️";
-                    androidCheck.classList.add("checkmark");
-                } else {
-                    androidCheck.innerHTML = "❌";
-                    androidCheck.classList.add("error");
-                    allChecksPassed = false;
-                }
-            } else {
-                androidCheck.innerHTML = "❓";
-                androidCheck.classList.add("unknown");
-                allChecksPassed = false;
-            }
-
-            // Other checks (storage, screen lock)
-            // Storage (simplified, as navigator.storage is limited)
-            const storageCheck = document.getElementById("storageCheck");
             if (navigator.storage && navigator.storage.estimate) {
                 const storage = await navigator.storage.estimate();
-                const freeSpace = (storage.quota - storage.usage) / (1024 * 1024); // MB
-                document.getElementById("storage").innerText = `${Math.round(freeSpace)} MB`;
+                freeSpaceMB = (storage.quota - storage.usage) / (1024*1024);
+                document.getElementById("storage").innerText = `${Math.round(freeSpaceMB)} MB`;
 
-                if (freeSpace >= 140) {
+                if (freeSpaceMB >= 140) {
                     storageCheck.innerHTML = "✔️";
                     storageCheck.classList.add("checkmark");
                 } else {
@@ -150,25 +171,82 @@
                 }
             } else {
                 storageCheck.innerHTML = "❓";
+                storageCheck.classList.add("unknown");
                 allChecksPassed = false;
             }
 
-            // Show links to apps if needed
-            if (browser !== "Microsoft Edge") {
-                document.getElementById("edgeLink").style.display = "block";
-                document.getElementById("companyPortalLink").style.display = "block";
+            // Dále platform-based logika:
+            // ===========================
+            if (os === "Android") {
+                // Nastav požadavek: "Android 10 nebo vyšší"
+                platformRequirement.textContent = "Android 10 nebo vyšší ";
+
+                // Zjisti real verzi:
+                const androidVersion = getAndroidVersion();
+                if (androidVersion && androidVersion >= 10) {
+                    platformCheck.innerHTML = "✔️";
+                    platformCheck.classList.add("checkmark");
+                } else {
+                    platformCheck.innerHTML = "❌";
+                    platformCheck.classList.add("error");
+                    allChecksPassed = false;
+                }
+                androidVerElem.innerText = androidVersion || "❓";
+
+                // Odkaz do Google Play
+                androidLink.style.display = "block";
+                appLinks.style.display    = "block";
+
+            } else if (os === "iOS") {
+                // iOS
+                platformRequirement.textContent = "iOS zařízení";
+                platformCheck.innerHTML        = "✔️";
+                platformCheck.classList.add("checkmark");
+                // Nastav do details
+                androidVerElem.innerText = "Nepoužitelné (iOS)";
+                // Odkaz do AppStore
+                iosLink.style.display = "block";
+                appLinks.style.display = "block";
+
+            } else if (os === "Windows") {
+                // Pouze Edge
+                platformRequirement.textContent = "Windows (Edge)";
+                // Zkontrolovat, jestli je to Edge:
+                let isEdge = false;
+                // Buď userAgent /Edg\// nebo brand check
+                // pro zjednodušení:
+                if (/Edg\//i.test(navigator.userAgent)) {
+                    isEdge = true;
+                }
+
+                if (!isEdge) {
+                    // Zobrazit X, fail
+                    platformCheck.innerHTML = "❌ (není Edge)";
+                    platformCheck.classList.add("error");
+                    allChecksPassed = false;
+                } else {
+                    platformCheck.innerHTML = "✔️";
+                    platformCheck.classList.add("checkmark");
+                    // Odkaz ke stažení Edge, pro jistotu
+                    edgeLink.style.display = "block";
+                    appLinks.style.display = "block";
+                }
+                androidVerElem.innerText = "Nepoužitelné (Windows)";
+            } else {
+                // Neznámé
+                platformRequirement.textContent = "Neznámé";
+                platformCheck.innerHTML = "❓";
+                platformCheck.classList.add("unknown");
+                allChecksPassed = false;
             }
 
-            // Lock screen detection
-            document.getElementById("screenLock").innerText = "Nelze zjistit (prohlížeč neumožňuje)";
-            document.getElementById("screenLockCheck").innerHTML = "❓";
-
-            // Final result: show OKbase link if all checks pass
+            // Zobrazení "Přejít na OKbase", jen pokud success
             if (allChecksPassed) {
-                document.getElementById("link").style.display = "block";
+                linkDiv.style.display = "block";
             }
         }
 
+        // Spustit
         runCompleteTest();
     </script>
 </body>
