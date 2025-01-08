@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kompletní kontrola požadavků</title>
+    <title>OKbase na zařízení Android</title>
     <style>
         .checkmark {
             color: green;
@@ -13,10 +13,13 @@
             color: red;
             font-weight: bold;
         }
+        #details {
+            display: none; /* Skryj informace o zařízení */
+        }
     </style>
 </head>
 <body>
-    <h1>Kontrola požadavků pro OKbase</h1>
+    <h1>OKbase na zařízení Android</h1>
     <ul>
         <li>140MB volného místa <span id="storageCheck"></span></li>
         <li>Android 10 nebo vyšší <span id="androidCheck"></span></li>
@@ -24,10 +27,20 @@
         <li>Aplikaci Portál společnosti <span id="companyPortalCheck"></span></li>
         <li>Zámek obrazovky <span id="screenLockCheck"></span></li>
     </ul>
-    <button onclick="runCompleteTest()">Spustit kontrolu</button>
     <p id="result"></p>
-    <h2>Informace o zařízení:</h2>
-    <ul>
+    <div id="link" style="display: none;">
+        <p>Všechny požadavky jsou splněny! Můžete pokračovat na:</p>
+        <a href="https://okbase2.miele.com" target="_blank">OKbase</a>
+    </div>
+    <div id="appLinks" style="display: none;">
+        <p>Některé aplikace nejsou nainstalovány. Stáhněte si je z Google Play:</p>
+        <ul>
+            <li><a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Stáhnout Microsoft Edge</a></li>
+            <li><a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal" target="_blank">Stáhnout Portál společnosti</a></li>
+        </ul>
+    </div>
+    <h2 id="detailsHeader" style="display: none;">Informace o zařízení:</h2>
+    <ul id="details">
         <li id="os"></li>
         <li id="browser"></li>
         <li id="screen"></li>
@@ -37,7 +50,10 @@
     <script>
         async function runCompleteTest() {
             let result = "Všechny požadavky jsou splněny!";
-            
+            let allChecksPassed = true;
+            let edgeInstalled = true;
+            let companyPortalInstalled = true;
+
             // Android check
             let androidCheck = document.getElementById("androidCheck");
             let userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -49,18 +65,17 @@
                 if (androidVersion && androidVersion >= 10) {
                     androidCheck.innerHTML = "✔️";
                     androidCheck.classList.add("checkmark");
-                } else if (androidVersion) {
+                } else {
+                    allChecksPassed = false;
                     result = "Požadavek na Android 10 nebo vyšší není splněn.";
                     androidCheck.innerHTML = "❌";
                     androidCheck.classList.add("error");
-                } else {
-                    result = "Verzi Androidu nebylo možné zjistit.";
-                    androidCheck.innerHTML = "❓";
                 }
                 document.getElementById("androidVersion").innerText = androidVersion
                     ? "Verze Androidu: " + androidVersion
                     : "Android detekován, ale verze neznámá.";
             } else {
+                allChecksPassed = false;
                 result = "Zařízení není Android.";
                 androidCheck.innerHTML = "❌";
                 androidCheck.classList.add("error");
@@ -75,12 +90,14 @@
                     storageCheck.innerHTML = "✔️";
                     storageCheck.classList.add("checkmark");
                 } else {
+                    allChecksPassed = false;
                     result = "Nedostatek místa (méně než 140 MB).";
                     storageCheck.innerHTML = "❌";
                     storageCheck.classList.add("error");
                 }
             } else {
                 storageCheck.innerHTML = "❓";
+                allChecksPassed = false;
                 result = "Nelze ověřit volné místo na disku.";
             }
 
@@ -90,15 +107,18 @@
                 edgeCheck.innerHTML = "✔️";
                 edgeCheck.classList.add("checkmark");
             } else {
+                allChecksPassed = false;
+                edgeInstalled = false;
                 result = "Aplikace Microsoft Edge není detekována.";
                 edgeCheck.innerHTML = "❌";
                 edgeCheck.classList.add("error");
             }
 
-            // Company Portal App check (těžko zjistitelné přes web)
+            // Company Portal App check (nelze spolehlivě detekovat přes web)
             let companyPortalCheck = document.getElementById("companyPortalCheck");
-            companyPortalCheck.innerHTML = "❓";
-            result += " Přítomnost aplikace Portál společnosti nelze ověřit přes web.";
+            companyPortalInstalled = false; // Nelze spolehlivě ověřit
+            companyPortalCheck.innerHTML = "❌";
+            companyPortalCheck.classList.add("error");
 
             // Screen lock check
             let screenLockCheck = document.getElementById("screenLockCheck");
@@ -106,51 +126,25 @@
                 screenLockCheck.innerHTML = "✔️";
                 screenLockCheck.classList.add("checkmark");
             } else {
+                allChecksPassed = false;
                 result = "Zámek obrazovky nelze ověřit.";
                 screenLockCheck.innerHTML = "❓";
             }
 
-            // Výsledky
+            // Zobraz odkazy na aplikace, pokud nejsou instalovány
+            if (!edgeInstalled || !companyPortalInstalled) {
+                document.getElementById("appLinks").style.display = "block";
+            }
+
+            // Pokud jsou splněny všechny požadavky, zobraz odkaz na OKbase
+            if (allChecksPassed) {
+                document.getElementById("link").style.display = "block";
+            }
+
             document.getElementById("result").innerText = result;
         }
 
-        function displayDeviceInfo() {
-            let userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            let os = "Neznámý OS";
-            let browser = "Neznámý prohlížeč";
-
-            if (/windows phone/i.test(userAgent)) {
-                os = "Windows Phone";
-            } else if (/android/i.test(userAgent)) {
-                os = "Android";
-            } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                os = "iOS";
-            } else if (/Macintosh/.test(userAgent)) {
-                os = "Mac OS";
-            } else if (/Windows/.test(userAgent)) {
-                os = "Windows";
-            } else if (/Linux/.test(userAgent)) {
-                os = "Linux";
-            }
-
-            if (/chrome/i.test(userAgent) && !/edge/i.test(userAgent)) {
-                browser = "Google Chrome";
-            } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
-                browser = "Safari";
-            } else if (/firefox/i.test(userAgent)) {
-                browser = "Mozilla Firefox";
-            } else if (/msie|trident/i.test(userAgent)) {
-                browser = "Internet Explorer";
-            } else if (/edge/i.test(userAgent)) {
-                browser = "Microsoft Edge";
-            }
-
-            document.getElementById("os").innerText = "Operační systém: " + os;
-            document.getElementById("browser").innerText = "Prohlížeč: " + browser;
-            document.getElementById("screen").innerText = "Rozlišení obrazovky: " + window.screen.width + "x" + window.screen.height;
-        }
-
-        displayDeviceInfo();
+        runCompleteTest();
     </script>
 </body>
 </html>
