@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontrola požadavků pro OKbase</title>
+    <title>Kompletní kontrola požadavků</title>
     <style>
         .checkmark {
             color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
             font-weight: bold;
         }
     </style>
@@ -14,13 +18,13 @@
 <body>
     <h1>Kontrola požadavků pro OKbase</h1>
     <ul>
-        <li>140MB volného místa</li>
+        <li>140MB volného místa <span id="storageCheck"></span></li>
         <li>Android 10 nebo vyšší <span id="androidCheck"></span></li>
-        <li>Aplikaci Microsoft Edge</li>
-        <li>Aplikaci Portál společnosti</li>
-        <li>Zámek obrazovky</li>
+        <li>Aplikaci Microsoft Edge <span id="edgeCheck"></span></li>
+        <li>Aplikaci Portál společnosti <span id="companyPortalCheck"></span></li>
+        <li>Zámek obrazovky <span id="screenLockCheck"></span></li>
     </ul>
-    <button onclick="checkRequirements()">Kontrola Android</button>
+    <button onclick="runCompleteTest()">Spustit kontrolu</button>
     <p id="result"></p>
     <h2>Informace o zařízení:</h2>
     <ul>
@@ -31,46 +35,84 @@
     </ul>
 
     <script>
-   function checkRequirements() {
-    let result = "Všechny požadavky jsou splněny!";
-    let androidCheck = document.getElementById("androidCheck");
+        async function runCompleteTest() {
+            let result = "Všechny požadavky jsou splněny!";
+            
+            // Android check
+            let androidCheck = document.getElementById("androidCheck");
+            let userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-    try {
-        let userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(userAgent)) {
+                let match = userAgent.match(/Android\s([0-9\.]*)/);
+                let androidVersion = match ? parseFloat(match[1]) : null;
 
-        if (/android/i.test(userAgent)) {
-            let match = userAgent.match(/Android\s([0-9\.]*)/);
-            let androidVersion = match ? parseFloat(match[1]) : null;
-
-            if (androidVersion && androidVersion >= 10) {
-                androidCheck.innerHTML = "✔️";
-                androidCheck.classList.add("checkmark");
-            } else if (androidVersion) {
-                result = "Požadavek na Android 10 nebo vyšší není splněn.";
-                androidCheck.innerHTML = "❌";
-                androidCheck.classList.remove("checkmark");
+                if (androidVersion && androidVersion >= 10) {
+                    androidCheck.innerHTML = "✔️";
+                    androidCheck.classList.add("checkmark");
+                } else if (androidVersion) {
+                    result = "Požadavek na Android 10 nebo vyšší není splněn.";
+                    androidCheck.innerHTML = "❌";
+                    androidCheck.classList.add("error");
+                } else {
+                    result = "Verzi Androidu nebylo možné zjistit.";
+                    androidCheck.innerHTML = "❓";
+                }
+                document.getElementById("androidVersion").innerText = androidVersion
+                    ? "Verze Androidu: " + androidVersion
+                    : "Android detekován, ale verze neznámá.";
             } else {
-                result = "Verzi Androidu nebylo možné zjistit.";
-                androidCheck.innerHTML = "❓";
-                androidCheck.classList.remove("checkmark");
+                result = "Zařízení není Android.";
+                androidCheck.innerHTML = "❌";
+                androidCheck.classList.add("error");
+                document.getElementById("androidVersion").innerText = "";
             }
 
-            document.getElementById("androidVersion").innerText = androidVersion
-                ? "Verze Androidu: " + androidVersion
-                : "Android detekován, ale verze neznámá.";
-        } else {
-            result = "Zařízení není Android.";
-            androidCheck.innerHTML = "❌";
-            androidCheck.classList.remove("checkmark");
-            document.getElementById("androidVersion").innerText = "";
+            // Storage check (orientační, není přesné)
+            let storageCheck = document.getElementById("storageCheck");
+            if (navigator.storage && navigator.storage.estimate) {
+                const storage = await navigator.storage.estimate();
+                if (storage.quota && storage.quota >= 140 * 1024 * 1024) {
+                    storageCheck.innerHTML = "✔️";
+                    storageCheck.classList.add("checkmark");
+                } else {
+                    result = "Nedostatek místa (méně než 140 MB).";
+                    storageCheck.innerHTML = "❌";
+                    storageCheck.classList.add("error");
+                }
+            } else {
+                storageCheck.innerHTML = "❓";
+                result = "Nelze ověřit volné místo na disku.";
+            }
+
+            // Browser check for Microsoft Edge
+            let edgeCheck = document.getElementById("edgeCheck");
+            if (/edg/i.test(userAgent)) {
+                edgeCheck.innerHTML = "✔️";
+                edgeCheck.classList.add("checkmark");
+            } else {
+                result = "Aplikace Microsoft Edge není detekována.";
+                edgeCheck.innerHTML = "❌";
+                edgeCheck.classList.add("error");
+            }
+
+            // Company Portal App check (těžko zjistitelné přes web)
+            let companyPortalCheck = document.getElementById("companyPortalCheck");
+            companyPortalCheck.innerHTML = "❓";
+            result += " Přítomnost aplikace Portál společnosti nelze ověřit přes web.";
+
+            // Screen lock check
+            let screenLockCheck = document.getElementById("screenLockCheck");
+            if (navigator.credentials && navigator.credentials.preventSilentAccess) {
+                screenLockCheck.innerHTML = "✔️";
+                screenLockCheck.classList.add("checkmark");
+            } else {
+                result = "Zámek obrazovky nelze ověřit.";
+                screenLockCheck.innerHTML = "❓";
+            }
+
+            // Výsledky
+            document.getElementById("result").innerText = result;
         }
-    } catch (error) {
-        result = "Došlo k chybě při kontrole požadavků: " + error.message;
-    }
-
-    document.getElementById("result").innerText = result;
-}
-
 
         function displayDeviceInfo() {
             let userAgent = navigator.userAgent || navigator.vendor || window.opera;
