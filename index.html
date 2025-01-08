@@ -14,7 +14,7 @@
             font-weight: bold;
         }
         #details {
-            display: none; /* Skryj informace o zařízení */
+            display: none;
         }
     </style>
 </head>
@@ -23,21 +23,23 @@
     <ul>
         <li>140MB volného místa <span id="storageCheck"></span></li>
         <li>Android 10 nebo vyšší <span id="androidCheck"></span></li>
-        <li>Aplikaci Microsoft Edge <span id="edgeCheck"></span></li>
-        <li>Aplikaci Portál společnosti <span id="companyPortalCheck"></span></li>
+        <li>Aplikace Microsoft Edge <span id="edgeCheck"></span></li>
+        <li>Aplikace Portál společnosti <span id="companyPortalCheck"></span></li>
         <li>Zámek obrazovky <span id="screenLockCheck"></span></li>
     </ul>
-    <p id="result"></p>
-    <div id="link" style="display: none;">
-        <p>Všechny požadavky jsou splněny! Můžete pokračovat na:</p>
-        <a href="https://okbase2.miele.com" target="_blank">OKbase</a>
-    </div>
     <div id="appLinks" style="display: none;">
-        <p>Některé aplikace nejsou nainstalovány. Stáhněte si je z Google Play:</p>
+        <p>Stáhněte požadované aplikace:</p>
         <ul>
-            <li><a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Stáhnout Microsoft Edge</a></li>
-            <li><a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal" target="_blank">Stáhnout Portál společnosti</a></li>
+            <li id="edgeLink" style="display: none;">
+                <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Stáhnout Microsoft Edge</a>
+            </li>
+            <li id="companyPortalLink" style="display: none;">
+                <a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal" target="_blank">Stáhnout Portál společnosti</a>
+            </li>
         </ul>
+    </div>
+    <div id="link" style="display: none;">
+        <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
     </div>
     <h2 id="detailsHeader" style="display: none;">Informace o zařízení:</h2>
     <ul id="details">
@@ -49,7 +51,6 @@
 
     <script>
         async function runCompleteTest() {
-            let result = "Všechny požadavky jsou splněny!";
             let allChecksPassed = true;
             let edgeInstalled = true;
             let companyPortalInstalled = true;
@@ -67,7 +68,6 @@
                     androidCheck.classList.add("checkmark");
                 } else {
                     allChecksPassed = false;
-                    result = "Požadavek na Android 10 nebo vyšší není splněn.";
                     androidCheck.innerHTML = "❌";
                     androidCheck.classList.add("error");
                 }
@@ -76,13 +76,12 @@
                     : "Android detekován, ale verze neznámá.";
             } else {
                 allChecksPassed = false;
-                result = "Zařízení není Android.";
                 androidCheck.innerHTML = "❌";
                 androidCheck.classList.add("error");
-                document.getElementById("androidVersion").innerText = "";
+                document.getElementById("androidVersion").innerText = "Zařízení není Android.";
             }
 
-            // Storage check (orientační, není přesné)
+            // Storage check (orientační)
             let storageCheck = document.getElementById("storageCheck");
             if (navigator.storage && navigator.storage.estimate) {
                 const storage = await navigator.storage.estimate();
@@ -91,14 +90,12 @@
                     storageCheck.classList.add("checkmark");
                 } else {
                     allChecksPassed = false;
-                    result = "Nedostatek místa (méně než 140 MB).";
                     storageCheck.innerHTML = "❌";
                     storageCheck.classList.add("error");
                 }
             } else {
-                storageCheck.innerHTML = "❓";
                 allChecksPassed = false;
-                result = "Nelze ověřit volné místo na disku.";
+                storageCheck.innerHTML = "❓";
             }
 
             // Browser check for Microsoft Edge
@@ -109,14 +106,13 @@
             } else {
                 allChecksPassed = false;
                 edgeInstalled = false;
-                result = "Aplikace Microsoft Edge není detekována.";
                 edgeCheck.innerHTML = "❌";
                 edgeCheck.classList.add("error");
             }
 
-            // Company Portal App check (nelze spolehlivě detekovat přes web)
+            // Company Portal App check
             let companyPortalCheck = document.getElementById("companyPortalCheck");
-            companyPortalInstalled = false; // Nelze spolehlivě ověřit
+            companyPortalInstalled = false; // Nelze zjistit spolehlivě přes web
             companyPortalCheck.innerHTML = "❌";
             companyPortalCheck.classList.add("error");
 
@@ -127,21 +123,27 @@
                 screenLockCheck.classList.add("checkmark");
             } else {
                 allChecksPassed = false;
-                result = "Zámek obrazovky nelze ověřit.";
                 screenLockCheck.innerHTML = "❓";
             }
 
             // Zobraz odkazy na aplikace, pokud nejsou instalovány
-            if (!edgeInstalled || !companyPortalInstalled) {
+            if (!edgeInstalled) {
+                document.getElementById("edgeLink").style.display = "block";
+                document.getElementById("appLinks").style.display = "block";
+            }
+            if (!companyPortalInstalled) {
+                document.getElementById("companyPortalLink").style.display = "block";
                 document.getElementById("appLinks").style.display = "block";
             }
 
-            // Pokud jsou splněny všechny požadavky, zobraz odkaz na OKbase
-            if (allChecksPassed) {
+            // Pokud požadavky nejsou splněny, zobraz informace o zařízení
+            if (!allChecksPassed) {
+                document.getElementById("details").style.display = "block";
+                document.getElementById("detailsHeader").style.display = "block";
+            } else {
+                // Pokud jsou všechny požadavky splněny, zobraz odkaz na OKbase
                 document.getElementById("link").style.display = "block";
             }
-
-            document.getElementById("result").innerText = result;
         }
 
         runCompleteTest();
