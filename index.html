@@ -229,6 +229,10 @@
       } else {
         headline.textContent = 'X - Neznámé zařízení';
       }
+
+      // 6.13. Additional Debugging: Display OS and Browser Names
+      console.log(`Detected OS: ${result.os.name} ${result.os.version}`);
+      console.log(`Detected Browser: ${result.browser.name} ${result.browser.version}`);
     }
   </script>
 
