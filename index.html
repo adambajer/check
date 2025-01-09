@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OKbase + Detect.js (Local Hosting) Demo</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Optional: Add a favicon -->
+  <title>OKbase + Detect.js Demo</title>
+  
+  <!-- 1. Link to Favicon to Prevent 404 Error -->
+  <!-- Ensure favicon.ico exists in your project root. If not, either add one or remove this line. -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- 2. Styles for the Page and Spinner -->
   <style>
     body {
       margin: 1rem;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
     }
     h1 { margin-bottom: 1rem; }
-    /* Spinner + Animace */
+    
+    /* Spinner Styles */
     .spinner {
-      width: 50px; height: 50px;
+      width: 50px; 
+      height: 50px;
       border: 5px solid #ccc;
       border-top-color: #0078d7;
       border-radius: 50%;
@@ -21,187 +28,208 @@
       margin: 2rem auto;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Container for Spinner */
     #loadingSpinner {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    /* Obsah (skrytý do odhalení) */
+    
+    /* Main Content Hidden Initially */
     #mainContent {
       display: none;
     }
 
+    /* Styles for Marks */
     .mark { font-weight: bold; }
     .ok   { color: green; }
     .unknown { color: orange; }
 
-    /* Responzivita */
+    /* Responsive Design */
     @media (max-width:600px) {
       body { font-size:0.95rem; }
       h1 { font-size:1.1rem; }
       .spinner {
-        width:30px; height:30px;
+        width:30px; 
+        height:30px;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- 1) Spinner -->
-<div id="loadingSpinner">
-  <div class="spinner"></div>
-</div>
-
-<!-- 2) Hlavní obsah -->
-<div id="mainContent">
-  <h1 id="headline"></h1>
-
-  <!-- Pouze Android => 4 řádky -->
-  <ul id="androidChecks" style="display:none;">
-    <li>Minimální verze Android 10: <span class="mark unknown" id="androidVersion">?</span></li>
-    <li>Volné místo 140 MB: <span class="mark unknown" id="androidSpace">?</span></li>
-    <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
-    <li>Portál společnosti: <span class="mark unknown" id="androidPortal">?</span></li>
-  </ul>
-
-  <!-- Windows => 1 řádek pro Edge -->
-  <ul id="windowsChecks" style="display:none;">
-    <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
-  </ul>
-
-  <!-- Apple => jen nadpis (poslední) -->
-  <ul id="appleChecks" style="display:none;">
-    <li>Portál společnosti: <span class="mark unknown" id="applePortal">?</span></li>
-  </ul>
-
-  <!-- Odkaz OKbase vždy -->
-  <div>
-    <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
+  <!-- 3. Spinner Displayed While Loading -->
+  <div id="loadingSpinner">
+    <div class="spinner"></div>
   </div>
-</div>
 
-<!-- 3) Detect.js Hosted Locally -->
-<script src="js/detect.js"></script>
-<script>
-  // Verify Detect.js is loaded
-  console.log('Detect.js loaded:', typeof Detect !== 'undefined');
+  <!-- 4. Main Content Displayed After Detection -->
+  <div id="mainContent">
+    <h1 id="headline"></h1>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Allow spinner to be visible for a brief moment
-    setTimeout(() => {
-      runDetection();
-    }, 1000);
-  });
+    <!-- Android Specific Checks -->
+    <ul id="androidChecks" style="display:none;">
+      <li>Minimální verze Android 10: <span class="mark unknown" id="androidVersion">?</span></li>
+      <li>Volné místo 140 MB: <span class="mark unknown" id="androidSpace">?</span></li>
+      <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
+      <li>Portál společnosti: <span class="mark unknown" id="androidPortal">?</span></li>
+    </ul>
 
-  function runDetection() {
-    const spinner     = document.getElementById('loadingSpinner');
-    const mainContent = document.getElementById('mainContent');
-    const headline    = document.getElementById('headline');
+    <!-- Windows Specific Checks -->
+    <ul id="windowsChecks" style="display:none;">
+      <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
+    </ul>
 
-    // Ensure Detect is available
-    if (typeof Detect === 'undefined') {
-      console.error('Detect.js is not loaded.');
+    <!-- Apple Specific Checks -->
+    <ul id="appleChecks" style="display:none;">
+      <li>Portál společnosti: <span class="mark unknown" id="applePortal">?</span></li>
+    </ul>
+
+    <!-- Always Visible Link to OKbase -->
+    <div>
+      <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
+    </div>
+  </div>
+
+  <!-- 5. Include Detect.js Locally -->
+  <script src="js/detect.js"></script>
+
+  <!-- 6. Custom Detection Script -->
+  <script>
+    // 6.1. Verify Detect.js is Loaded
+    console.log('Detect.js loaded:', typeof detect !== 'undefined');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Allow spinner to be visible for a brief moment
+      setTimeout(() => {
+        runDetection();
+      }, 500); // Reduced timeout for faster testing
+    });
+
+    function runDetection() {
+      const spinner     = document.getElementById('loadingSpinner');
+      const mainContent = document.getElementById('mainContent');
+      const headline    = document.getElementById('headline');
+
+      // 6.2. Ensure Detect.js is Available
+      if (typeof detect === 'undefined') {
+        console.error('Detect.js is not loaded.');
+        spinner.style.display     = 'none';
+        mainContent.style.display = 'block';
+        headline.textContent = 'X - Detekce selhala';
+        return;
+      }
+
+      // 6.3. Parse User-Agent String
+      const info = detect.parse(navigator.userAgent);
+      console.log('Detection info:', info); // Debugging log
+
+      // 6.4. Check if Detection Info is Valid
+      if (!info || Object.keys(info).length === 0) {
+        console.error('Detection info is empty.');
+        spinner.style.display     = 'none';
+        mainContent.style.display = 'block';
+        headline.textContent = 'X - Detekce selhala';
+        return;
+      }
+
+      // 6.5. Hide Spinner and Show Main Content
       spinner.style.display     = 'none';
       mainContent.style.display = 'block';
-      headline.textContent = 'X - Detekce selhala';
-      return;
+
+      // 6.6. Extract OS and Browser Information
+      let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
+      let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
+
+      // 6.7. Get Check Elements
+      const androidChecks = document.getElementById('androidChecks');
+      const windowsChecks = document.getElementById('windowsChecks');
+      const appleChecks   = document.getElementById('appleChecks');
+
+      // 6.8. Reset UI Elements
+      headline.textContent = '';
+      androidChecks.style.display = 'none';
+      windowsChecks.style.display = 'none';
+      appleChecks.style.display = 'none';
+
+      // 6.9. Android Detection Logic
+      if (osFamily.includes('android')) {
+        headline.textContent = 'OKbase na zařízení Android';
+        androidChecks.style.display = 'block';
+
+        // Check Android Version (Assuming info.os.version exists)
+        const androidVersionEl = document.getElementById('androidVersion');
+        if (info.os.version && parseInt(info.os.version, 10) >= 10) {
+          androidVersionEl.textContent = '✔️';
+          androidVersionEl.classList.remove('unknown');
+          androidVersionEl.classList.add('ok');
+        } else {
+          androidVersionEl.textContent = '❌';
+          androidVersionEl.classList.remove('unknown');
+          androidVersionEl.classList.add('unknown');
+        }
+
+        // Check Free Space (Placeholder Logic)
+        const androidSpaceEl = document.getElementById('androidSpace');
+        // Implement actual free space check if possible
+        androidSpaceEl.textContent = '✔️';
+        androidSpaceEl.classList.remove('unknown');
+        androidSpaceEl.classList.add('ok');
+
+        // Check for Microsoft Edge Browser
+        const edgeAndroidEl = document.getElementById('edgeAndroid');
+        if (brFamily.includes('edge')) {
+          edgeAndroidEl.textContent = '✔️';
+          edgeAndroidEl.classList.remove('unknown');
+          edgeAndroidEl.classList.add('ok');
+        } else {
+          edgeAndroidEl.textContent = '❌';
+          edgeAndroidEl.classList.remove('unknown');
+          edgeAndroidEl.classList.add('unknown');
+        }
+
+        // Portal Check (Placeholder Logic)
+        const androidPortalEl = document.getElementById('androidPortal');
+        // Implement actual portal availability check if possible
+        androidPortalEl.textContent = '✔️';
+        androidPortalEl.classList.remove('unknown');
+        androidPortalEl.classList.add('ok');
+
+      // 6.10. Apple (iOS) Detection Logic
+      } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
+        headline.textContent = 'OKbase na zařízení Apple';
+        appleChecks.style.display = 'block';
+
+        // Portal Check (Placeholder Logic)
+        const applePortalEl = document.getElementById('applePortal');
+        // Implement actual portal availability check if possible
+        applePortalEl.textContent = '✔️';
+        applePortalEl.classList.remove('unknown');
+        applePortalEl.classList.add('ok');
+
+      // 6.11. Windows Detection Logic
+      } else if (osFamily.includes('windows')) {
+        headline.textContent = 'OKbase na zařízení Windows';
+        windowsChecks.style.display = 'block';
+
+        const edgeWindowsEl = document.getElementById('edgeWindows');
+        if (brFamily.includes('edge')) {
+          edgeWindowsEl.textContent = '✔️';
+          edgeWindowsEl.classList.remove('unknown');
+          edgeWindowsEl.classList.add('ok');
+        } else {
+          edgeWindowsEl.textContent = '❌';
+          edgeWindowsEl.classList.remove('unknown');
+          edgeWindowsEl.classList.add('unknown');
+        }
+
+      // 6.12. Unknown Device Detection
+      } else {
+        headline.textContent = 'X - Neznámé zařízení';
+      }
     }
-
-    const info = Detect.parse(navigator.userAgent);
-
-    spinner.style.display     = 'none';
-    mainContent.style.display = 'block';
-
-    let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
-    let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
-
-    const androidChecks = document.getElementById('androidChecks');
-    const windowsChecks = document.getElementById('windowsChecks');
-    const appleChecks   = document.getElementById('appleChecks');
-
-    // Reset UI
-    headline.textContent = '';
-    androidChecks.style.display = 'none';
-    windowsChecks.style.display = 'none';
-    appleChecks.style.display = 'none';
-
-    // 1) Android => 4 řádky
-    if (osFamily.includes('android')) {
-      headline.textContent = 'OKbase na zařízení Android';
-      androidChecks.style.display = 'block';
-
-      // Check Android version (assuming info.os.version exists)
-      const androidVersionEl = document.getElementById('androidVersion');
-      if (info.os.version && parseInt(info.os.version, 10) >= 10) {
-        androidVersionEl.textContent = '✔️';
-        androidVersionEl.classList.remove('unknown');
-        androidVersionEl.classList.add('ok');
-      } else {
-        androidVersionEl.textContent = '❌';
-        androidVersionEl.classList.remove('unknown');
-        androidVersionEl.classList.add('unknown');
-      }
-
-      // Check free space (placeholder logic)
-      const androidSpaceEl = document.getElementById('androidSpace');
-      // Implement actual free space check if possible
-      androidSpaceEl.textContent = '✔️';
-      androidSpaceEl.classList.remove('unknown');
-      androidSpaceEl.classList.add('ok');
-
-      // Check for Microsoft Edge
-      const edgeAndroidEl = document.getElementById('edgeAndroid');
-      if (brFamily.includes('edge')) {
-        edgeAndroidEl.textContent = '✔️';
-        edgeAndroidEl.classList.remove('unknown');
-        edgeAndroidEl.classList.add('ok');
-      } else {
-        edgeAndroidEl.textContent = '❌';
-        edgeAndroidEl.classList.remove('unknown');
-        edgeAndroidEl.classList.add('unknown');
-      }
-
-      // Portal Check (placeholder logic)
-      const androidPortalEl = document.getElementById('androidPortal');
-      // Implement actual portal availability check if possible
-      androidPortalEl.textContent = '✔️';
-      androidPortalEl.classList.remove('unknown');
-      androidPortalEl.classList.add('ok');
-
-    // 2) Apple => Display relevant checks
-    } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
-      headline.textContent = 'OKbase na zařízení Apple';
-      appleChecks.style.display = 'block';
-
-      // Portal Check (placeholder logic)
-      const applePortalEl = document.getElementById('applePortal');
-      // Implement actual portal availability check if possible
-      applePortalEl.textContent = '✔️';
-      applePortalEl.classList.remove('unknown');
-      applePortalEl.classList.add('ok');
-
-    // 3) Windows => 1 řádek pro Edge
-    } else if (osFamily.includes('windows')) {
-      headline.textContent = 'OKbase na zařízení Windows';
-      windowsChecks.style.display = 'block';
-
-      const edgeWindowsEl = document.getElementById('edgeWindows');
-      if (brFamily.includes('edge')) {
-        edgeWindowsEl.textContent = '✔️';
-        edgeWindowsEl.classList.remove('unknown');
-        edgeWindowsEl.classList.add('ok');
-      } else {
-        edgeWindowsEl.textContent = '❌';
-        edgeWindowsEl.classList.remove('unknown');
-        edgeWindowsEl.classList.add('unknown');
-      }
-
-    // 4) Neznámé => křížek v nadpisu
-    } else {
-      headline.textContent = 'X - Neznámé zařízení';
-    }
-  }
-</script>
+  </script>
 
 </body>
 </html>
