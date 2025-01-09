@@ -1,25 +1,16 @@
- 
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OKbase + UAParser.js Demo</title>
-  
-  <!-- 1. Link to Favicon to Prevent 404 Error -->
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  
-  <!-- 2. Styles for the Page and Spinner -->
   <style>
     body {
       margin: 1rem;
       font-family: Arial, sans-serif;
     }
-    h1 { margin-bottom: 1rem; }
-    
-    /* Spinner Styles */
     .spinner {
-      width: 50px; 
+      width: 50px;
       height: 50px;
       border: 5px solid #ccc;
       border-top-color: #0078d7;
@@ -27,270 +18,162 @@
       animation: spin 1s linear infinite;
       margin: 2rem auto;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
-    /* Container for Spinner */
-    #loadingSpinner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
-    
-    /* Main Content Hidden Initially */
-    #mainContent {
-      display: none;
+    .mark {
+      font-weight: bold;
     }
-
-    /* Styles for Marks and Links */
-    .mark { font-weight: bold; }
-    .ok   { color: green; }
-    .unknown { color: orange; }
-    .link a { color: blue; text-decoration: underline; }
-    .link { margin-top: 0.5rem; }
-
-    /* Responsive Design */
-    @media (max-width:600px) {
-      body { font-size:0.95rem; }
-      h1 { font-size:1.1rem; }
+    .ok {
+      color: green;
+    }
+    .unknown {
+      color: orange;
+    }
+    .link a {
+      color: blue;
+      text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.95rem;
+      }
       .spinner {
-        width:30px; 
-        height:30px;
+        width: 30px;
+        height: 30px;
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- 3. Spinner Displayed While Loading -->
-  <div id="loadingSpinner">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- 4. Main Content Displayed After Detection -->
-  <div id="mainContent">
-    <h1 id="headline"></h1>
-
-    <!-- Android Specific Checks -->
-    <ul id="androidChecks" style="display:none;">
-      <li>Minimální verze Android 10: <span class="mark unknown" id="androidVersion">?</span></li>
-      <li>Volné místo 140 MB: <span class="mark unknown" id="androidSpace">?</span></li>
-      <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
-      <li>Portál společnosti: <span class="mark unknown" id="androidPortal">?</span></li>
-      <!-- Link to Microsoft Edge on Google Play if Edge isn't installed -->
-      <li id="edgeLinkAndroid" style="display:none;" class="link">
-        Stáhněte Microsoft Edge: <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Google Play</a>
-      </li>
-      <!-- Link to Company Portal on Google Play -->
-      <li id="portalLinkAndroid" class="link">
-        Stáhněte Portál společnosti: <a href="https://play.google.com/store/apps/details?id=com.microsoft.portal" target="_blank">Google Play</a>
-      </li>
-    </ul>
-
-    <!-- Windows Specific Checks -->
-    <ul id="windowsChecks" style="display:none;">
-      <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
-      <!-- Link to Microsoft Edge download page if Edge isn't installed -->
-      <li id="edgeLinkWindows" style="display:none;" class="link">
-        Stáhněte Microsoft Edge: <a href="https://www.microsoft.com/edge" target="_blank">Oficiální stránka</a>
-      </li>
-      <!-- Link to Company Portal on Official Site -->
-      <li id="portalLinkWindows" class="link">
-        Stáhněte Portál společnosti: <a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">Oficiální stránka</a>
-      </li>
-    </ul>
-
-    <!-- Apple Specific Checks -->
-    <ul id="appleChecks" style="display:none;">
-      <li>Portál společnosti: <span class="mark unknown" id="applePortal">?</span></li>
-      <!-- Link to Microsoft Edge on Apple App Store if Edge isn't installed -->
-      <li id="edgeLinkApple" style="display:none;" class="link">
-        Stáhněte Microsoft Edge: <a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">App Store</a>
-      </li>
-      <!-- Link to Company Portal on Apple App Store -->
-      <li id="portalLinkApple" class="link">
-        Stáhněte Portál společnosti: <a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">App Store</a>
-      </li>
-    </ul>
-
-    <!-- Always Visible Link to OKbase -->
-    <div>
-      <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
-    </div>
-  </div>
-
-  <!-- 5. Include UAParser.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.31/dist/ua-parser.min.js"></script>
-
-  <!-- 6. Custom Detection Script Using UAParser.js -->
   <script>
-    // 6.1. Verify UAParser.js is Loaded
-    console.log('UAParser.js loaded:', typeof UAParser !== 'undefined');
+    // Create and display a loading spinner
+    const spinner = document.createElement("div");
+    spinner.className = "spinner";
+    document.body.appendChild(spinner);
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Allow spinner to be visible for a brief moment
-      setTimeout(() => {
-        runDetection();
-      }, 500); // Adjust timeout as needed
-    });
+    // Delay execution to simulate loading
+    setTimeout(() => {
+      runDetection();
+    }, 500);
 
     function runDetection() {
-      const spinner     = document.getElementById('loadingSpinner');
-      const mainContent = document.getElementById('mainContent');
-      const headline    = document.getElementById('headline');
+      // Remove spinner
+      document.body.removeChild(spinner);
 
-      // 6.2. Ensure UAParser.js is Available
-      if (typeof UAParser === 'undefined') {
-        console.error('UAParser.js is not loaded.');
-        spinner.style.display     = 'none';
-        mainContent.style.display = 'block';
-        headline.textContent = 'X - Detekce selhala';
-        return;
-      }
-
-      // 6.3. Parse User-Agent String
+      // Initialize UAParser
       const parser = new UAParser();
       const result = parser.getResult();
-      console.log('Detection info:', result); // Debugging log
 
-      // 6.4. Check if Detection Info is Valid
+      // Create and append headline
+      const headline = document.createElement("h1");
+      document.body.appendChild(headline);
+
       if (!result || Object.keys(result).length === 0) {
-        console.error('Detection info is empty.');
-        spinner.style.display     = 'none';
-        mainContent.style.display = 'block';
-        headline.textContent = 'X - Detekce selhala';
+        headline.textContent = "X - Detekce selhala";
         return;
       }
 
-      // 6.5. Explicit Edge Chromium-based Detection
-      if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
-        result.browser.name = 'Edge';
-        result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
-        console.log('Adjusted Browser:', result.browser.name, result.browser.version);
+      // Extract OS and browser information
+      const osFamily = result.os.name ? result.os.name.toLowerCase() : "unknown";
+      const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : "unknown";
+
+      // Display specific content based on OS
+      if (osFamily.includes("android")) {
+        headline.textContent = "OKbase na zařízení Android";
+        displayAndroidChecks(result);
+      } else if (osFamily.includes("ios") || osFamily.includes("mac os")) {
+        headline.textContent = "OKbase na zařízení Apple";
+        displayAppleChecks();
+      } else if (osFamily.includes("windows")) {
+        headline.textContent = "OKbase na zařízení Windows";
+        displayWindowsChecks(browserFamily);
+      } else {
+        headline.textContent = "X - Neznámé zařízení";
       }
 
-      // 6.6. Hide Spinner and Show Main Content
-      spinner.style.display     = 'none';
-      mainContent.style.display = 'block';
+      // Always add a static link to OKbase
+      const okbaseLink = document.createElement("div");
+      okbaseLink.innerHTML = '<a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>';
+      document.body.appendChild(okbaseLink);
+    }
 
-      // 6.7. Extract OS and Browser Information
-      let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
-      let brFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
+    function displayAndroidChecks(result) {
+      const checks = [
+        {
+          text: "Minimální verze Android 10",
+          condition: result.os.version && parseInt(result.os.version, 10) >= 10,
+        },
+        {
+          text: "Volné místo 140 MB",
+          condition: true, // Simulate sufficient space
+        },
+        {
+          text: "Microsoft Edge",
+          condition: result.browser.name && result.browser.name.toLowerCase() === "edge",
+        },
+      ];
 
-      // 6.8. Get Check Elements
-      const androidChecks = document.getElementById('androidChecks');
-      const windowsChecks = document.getElementById('windowsChecks');
-      const appleChecks   = document.getElementById('appleChecks');
+      const ul = document.createElement("ul");
+      checks.forEach((check) => {
+        const li = document.createElement("li");
+        const mark = document.createElement("span");
+        mark.textContent = check.condition ? "✔️" : "❌";
+        mark.className = check.condition ? "mark ok" : "mark unknown";
+        li.textContent = `${check.text}: `;
+        li.appendChild(mark);
+        ul.appendChild(li);
+      });
 
-      // 6.9. Reset UI Elements
-      headline.textContent = '';
-      androidChecks.style.display = 'none';
-      windowsChecks.style.display = 'none';
-      appleChecks.style.display = 'none';
-
-      // 6.10. Android Detection Logic
-      if (osFamily.includes('android')) {
-        headline.textContent = 'OKbase na zařízení Android';
-        androidChecks.style.display = 'block';
-
-        // Check Android Version (Assuming result.os.version exists)
-        const androidVersionEl = document.getElementById('androidVersion');
-        if (result.os.version && parseInt(result.os.version, 10) >= 10) {
-          androidVersionEl.textContent = '✔️';
-          androidVersionEl.classList.remove('unknown');
-          androidVersionEl.classList.add('ok');
-        } else {
-          androidVersionEl.textContent = '❌';
-          androidVersionEl.classList.remove('unknown');
-          androidVersionEl.classList.add('unknown');
-        }
-
-      
-        const androidSpaceEl = document.getElementById('androidSpace');
-        // Implement actual free space check if possible
-        // For demonstration, assume free space is sufficient
-        androidSpaceEl.textContent = '✔️';
-        androidSpaceEl.classList.remove('unknown');
-        androidSpaceEl.classList.add('ok');
-
-        // Check for Microsoft Edge Browser
-        const edgeAndroidEl = document.getElementById('edgeAndroid');
-        if (brFamily.includes('edge')) {
-          edgeAndroidEl.textContent = '✔️';
-          edgeAndroidEl.classList.remove('unknown');
-          edgeAndroidEl.classList.add('ok');
-        } else {
-          edgeAndroidEl.textContent = '❌';
-          edgeAndroidEl.classList.remove('unknown');
-          edgeAndroidEl.classList.add('unknown');
-          // Show link to Microsoft Edge on Google Play
-          const edgeLinkAndroid = document.getElementById('edgeLinkAndroid');
-          edgeLinkAndroid.style.display = 'block';
-        }
-
-        // Portál Společnosti: Always show link
-        const androidPortalEl = document.getElementById('androidPortal');
-        androidPortalEl.innerHTML = '<a href="https://play.google.com/store/apps/details?id=com.microsoft.portal" target="_blank">Stáhněte Portál společnosti: Google Play</a>';
-
-      }
-      // 6.11. Apple (iOS) Detection Logic
-      else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
-        headline.textContent = 'OKbase na zařízení Apple';
-        appleChecks.style.display = 'block';
-
-        // Portál Společnosti: Always show link
-        const applePortalEl = document.getElementById('applePortal');
-        applePortalEl.innerHTML = '<a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Stáhněte Portál společnosti: App Store</a>';
-
-        // Provide link to Microsoft Edge on App Store
-        const edgeLinkApple = document.getElementById('edgeLinkApple');
-        edgeLinkApple.style.display = 'block';
-      }
-       else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad') || osFamily.includes('mac os')) {
-    headline.textContent = 'OKbase na zařízení Apple';
-    appleChecks.style.display = 'block';
-
-    // Portál Společnosti: Always show link
-    const applePortalEl = document.getElementById('applePortal');
-    applePortalEl.innerHTML = '<a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Stáhněte Portál společnosti: App Store</a>';
-
-    // Provide link to Microsoft Edge on App Store
-    const edgeLinkApple = document.getElementById('edgeLinkApple');
-    edgeLinkApple.style.display = 'block';
-}
-
-      // 6.12. Windows Detection Logic
-      else if (osFamily.includes('windows')) {
-        headline.textContent = 'OKbase na zařízení Windows';
-        windowsChecks.style.display = 'block';
-
-        const edgeWindowsEl = document.getElementById('edgeWindows');
-        if (brFamily.includes('edge')) {
-          edgeWindowsEl.textContent = '✔️';
-          edgeWindowsEl.classList.remove('unknown');
-          edgeWindowsEl.classList.add('ok');
-        } else {
-          edgeWindowsEl.textContent = '❌';
-          edgeWindowsEl.classList.remove('unknown');
-          edgeWindowsEl.classList.add('unknown');
-          // Show link to Microsoft Edge download page
-          const edgeLinkWindows = document.getElementById('edgeLinkWindows');
-          edgeLinkWindows.style.display = 'block';
-        }
-
-        // Portál Společnosti: Always show link
-        const portalLinkWindows = document.getElementById('portalLinkWindows');
-        portalLinkWindows.innerHTML = '<a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">Stáhněte Portál společnosti: Oficiální stránka</a>';
-      }
-      // 6.13. Unknown Device Detection
-      else {
-        headline.textContent = 'X - Neznámé zařízení';
+      // Append Microsoft Edge download link if needed
+      if (!checks[2].condition) {
+        const edgeLink = document.createElement("div");
+        edgeLink.innerHTML =
+          'Stáhněte: <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Microsoft Edge na Google Play</a>';
+        ul.appendChild(edgeLink);
       }
 
-      // 6.14. Additional Debugging: Display OS and Browser Names
-      console.log(`Detected OS: ${result.os.name} ${result.os.version}`);
-      console.log(`Detected Browser: ${result.browser.name} ${result.browser.version}`);
+      document.body.appendChild(ul);
+    }
+
+    function displayAppleChecks() {
+      const ul = document.createElement("ul");
+      ul.innerHTML = `
+        <li>Portál společnosti: <span class="mark unknown">❌</span></li>
+        <div>Stáhněte: <a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Portál společnosti na App Store</a></div>
+        <div>Stáhněte: <a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">Microsoft Edge na App Store</a></div>
+      `;
+      document.body.appendChild(ul);
+    }
+
+    function displayWindowsChecks(browserFamily) {
+      const ul = document.createElement("ul");
+
+      const edgeCheck = document.createElement("li");
+      edgeCheck.textContent = "Microsoft Edge: ";
+      const edgeMark = document.createElement("span");
+      edgeMark.textContent = browserFamily === "edge" ? "✔️" : "❌";
+      edgeMark.className = browserFamily === "edge" ? "mark ok" : "mark unknown";
+      edgeCheck.appendChild(edgeMark);
+      ul.appendChild(edgeCheck);
+
+      if (browserFamily !== "edge") {
+        const edgeLink = document.createElement("li");
+        edgeLink.innerHTML =
+          'Stáhněte: <a href="https://www.microsoft.com/edge" target="_blank">Microsoft Edge pro Windows</a>';
+        ul.appendChild(edgeLink);
+      }
+
+      const portalLink = document.createElement("li");
+      portalLink.innerHTML =
+        'Stáhněte: <a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">Portál společnosti pro Windows</a>';
+      ul.appendChild(portalLink);
+
+      document.body.appendChild(ul);
     }
   </script>
-
 </body>
 </html>
