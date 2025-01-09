@@ -71,6 +71,22 @@
       height: 60vh;
     }
     
+    /* Hlavní nadpis */
+    h1#headline {
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: var(--miele-black);
+    }
+
+    /* Sekundární nadpisy */
+    h2 {
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      font-size: 1.3rem;
+    }
+    
     /* Check Rows Styling */
     .check-row {
       margin-bottom: 1rem;
@@ -90,7 +106,30 @@
     }
     .check-row .unknown {
       color: var(--mark-unknown);
+      position: relative; /* Pro tooltip */
+      cursor: help;
     }
+    /* Tooltip styl pro otazník */
+    .check-row .unknown .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      padding: 6px;
+      position: absolute;
+      top: 150%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      z-index: 99;
+      white-space: nowrap;
+    }
+    .check-row .unknown:hover .tooltip-text {
+      visibility: visible;
+    }
+    
     .check-row .ok {
       color: var(--mark-success);
     }
@@ -111,6 +150,19 @@
     }
     .download-link a:hover {
       text-decoration: underline;
+    }
+    
+    /* Tlačítko přechodu na OKbase */
+    .btn-primary {
+      background-color: var(--miele-red);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+      background-color: #c80026; /* Tmavší odstín červené */
     }
     
     /* Modal Styling */
@@ -156,7 +208,6 @@
       }
       .download-link {
         font-size: 1rem;
-        text-align: right;
       }
       .modal-title {
         font-size: 1.2rem;
@@ -193,13 +244,13 @@
     <h1 id="headline" class="mb-4 text-center"></h1>
     
     <!-- Kontrola požadavků -->
-    <h2>Kontrola požadavků</h2>
+    <h2 class="text-center">Kontrola požadavků</h2>
     <div id="requirements" class="mb-4">
       <!-- Dynamické Check Rows Bude Zde -->
     </div>
     
     <!-- Ke stažení -->
-    <h2>Ke stažení</h2>
+    <h2 class="text-center">Ke stažení</h2>
     <div id="downloads" class="mb-4">
       <!-- Dynamické Download Links Bude Zde -->
     </div>
@@ -390,13 +441,16 @@
       return row;
     }
     
+    // V této verzi je otazník s tooltipem, kde se teprve na hover ukáže text "Nelze zjistit"
     function createCheckRowPortal(text) {
       const row = document.createElement('div');
       row.className = 'check-row';
       row.innerHTML = `
         <span>${text}</span>
-        <span class="mark unknown">?</span>
-        <span class="text-muted ms-2">(Nelze zjistit)</span>
+        <span class="mark unknown">
+          ?
+          <span class="tooltip-text">Nelze zjistit</span>
+        </span>
       `;
       return row;
     }
