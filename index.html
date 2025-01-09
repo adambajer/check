@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OKbase + Detect.js Demo</title>
+  <title>OKbase + UAParser.js Demo</title>
   
   <!-- 1. Link to Favicon to Prevent 404 Error -->
   <!-- Ensure favicon.ico exists in your project root. If not, either add one or remove this line. -->
@@ -92,19 +92,19 @@
     </div>
   </div>
 
-  <!-- 5. Include Detect.js Locally -->
-  <script src="js/detect.js"></script>
+  <!-- 5. Include UAParser.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.31/dist/ua-parser.min.js"></script>
 
-  <!-- 6. Custom Detection Script -->
+  <!-- 6. Custom Detection Script Using UAParser.js -->
   <script>
-    // 6.1. Verify Detect.js is Loaded
-    console.log('Detect.js loaded:', typeof detect !== 'undefined');
+    // 6.1. Verify UAParser.js is Loaded
+    console.log('UAParser.js loaded:', typeof UAParser !== 'undefined');
 
     document.addEventListener('DOMContentLoaded', () => {
       // Allow spinner to be visible for a brief moment
       setTimeout(() => {
         runDetection();
-      }, 500); // Reduced timeout for faster testing
+      }, 500); // Adjust timeout as needed
     });
 
     function runDetection() {
@@ -112,9 +112,9 @@
       const mainContent = document.getElementById('mainContent');
       const headline    = document.getElementById('headline');
 
-      // 6.2. Ensure Detect.js is Available
-      if (typeof detect === 'undefined') {
-        console.error('Detect.js is not loaded.');
+      // 6.2. Ensure UAParser.js is Available
+      if (typeof UAParser === 'undefined') {
+        console.error('UAParser.js is not loaded.');
         spinner.style.display     = 'none';
         mainContent.style.display = 'block';
         headline.textContent = 'X - Detekce selhala';
@@ -122,11 +122,12 @@
       }
 
       // 6.3. Parse User-Agent String
-      const info = detect.parse(navigator.userAgent);
-      console.log('Detection info:', info); // Debugging log
+      const parser = new UAParser();
+      const result = parser.getResult();
+      console.log('Detection info:', result); // Debugging log
 
       // 6.4. Check if Detection Info is Valid
-      if (!info || Object.keys(info).length === 0) {
+      if (!result || Object.keys(result).length === 0) {
         console.error('Detection info is empty.');
         spinner.style.display     = 'none';
         mainContent.style.display = 'block';
@@ -139,8 +140,8 @@
       mainContent.style.display = 'block';
 
       // 6.6. Extract OS and Browser Information
-      let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
-      let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
+      let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
+      let brFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
 
       // 6.7. Get Check Elements
       const androidChecks = document.getElementById('androidChecks');
@@ -158,9 +159,9 @@
         headline.textContent = 'OKbase na zařízení Android';
         androidChecks.style.display = 'block';
 
-        // Check Android Version (Assuming info.os.version exists)
+        // Check Android Version (Assuming result.os.version exists)
         const androidVersionEl = document.getElementById('androidVersion');
-        if (info.os.version && parseInt(info.os.version, 10) >= 10) {
+        if (result.os.version && parseInt(result.os.version, 10) >= 10) {
           androidVersionEl.textContent = '✔️';
           androidVersionEl.classList.remove('unknown');
           androidVersionEl.classList.add('ok');
