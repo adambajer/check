@@ -132,7 +132,7 @@
       if (!checks[2].condition) {
         const edgeLink = document.createElement("div");
         edgeLink.innerHTML =
-          'Stáhněte: <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Microsoft Edge na Google Play</a>';
+          '<a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Microsoft Edge na Google Play</a>';
         ul.appendChild(edgeLink);
       }
 
@@ -143,8 +143,8 @@
       const ul = document.createElement("ul");
       ul.innerHTML = `
         <li>Portál společnosti: <span class="mark unknown">❌</span></li>
-        <div>Stáhněte: <a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Portál společnosti na App Store</a></div>
-        <div>Stáhněte: <a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">Microsoft Edge na App Store</a></div>
+        <div><a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Portál společnosti na App Store</a></div>
+        <div><a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">Microsoft Edge na App Store</a></div>
       `;
       document.body.appendChild(ul);
     }
@@ -163,13 +163,13 @@
       if (browserFamily !== "edge") {
         const edgeLink = document.createElement("li");
         edgeLink.innerHTML =
-          'Stáhněte: <a href="https://www.microsoft.com/edge" target="_blank">Microsoft Edge pro Windows</a>';
+          '<a href="https://www.microsoft.com/edge" target="_blank">Microsoft Edge pro Windows</a>';
         ul.appendChild(edgeLink);
       }
 
       const portalLink = document.createElement("li");
       portalLink.innerHTML =
-        'Stáhněte: <a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">Portál společnosti pro Windows</a>';
+        '<a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">Portál společnosti pro Windows</a>';
       ul.appendChild(portalLink);
 
       document.body.appendChild(ul);
