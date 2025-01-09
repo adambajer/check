@@ -4,341 +4,384 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>OKbase + UAParser.js Demo</title>
+  
+  <!-- 1. Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- 2. Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  
   <style>
+    /* Miele Branding Colors */
+    :root {
+      --miele-red: #E4002B;
+      --miele-black: #000000;
+      --miele-white: #FFFFFF;
+    }
+    
     body {
-      margin: 1rem;
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
+      background-color: var(--miele-white);
+      color: var(--miele-black);
     }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #ccc;
-      border-top-color: #0078d7;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 2rem auto;
+    
+    /* Navbar Styling */
+    .navbar {
+      background-color: var(--miele-red);
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .navbar-brand img {
+      height: 40px;
     }
-
-    /* Markers for checks */
-    .mark {
+    .info-icon {
+      color: var(--miele-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    /* Spinner Centering */
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 60vh;
+    }
+    
+    /* Check Rows Styling */
+    .check-row {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    .check-row .mark {
       font-weight: bold;
+      margin-left: 0.5rem;
     }
-    .ok {
+    .check-row .unknown {
+      color: orange;
+    }
+    .check-row .ok {
       color: green;
     }
-    .unknown {
-      color: orange; /* For the question mark or failing checks */
+    
+    /* Download Links Styling */
+    .download-link {
+      margin-bottom: 1rem;
     }
-
-    /* Link styling */
-    .link a {
-      color: blue; 
-      text-decoration: underline;
+    
+    /* Modal Styling */
+    .modal-header {
+      background-color: var(--miele-red);
+      color: var(--miele-white);
     }
-
+    
+    .modal-title {
+      margin: 0 auto;
+    }
+    
+    .modal-body pre {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 0.25rem;
+    }
+    
+    /* Info Icon Positioning */
+    #infoIcon {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1050; /* Above other elements */
+    }
+    
     /* Responsive tweak */
     @media (max-width: 600px) {
-      body {
-        font-size: 0.95rem;
-      }
+      body { font-size: 0.95rem; }
       .spinner {
         width: 30px;
         height: 30px;
+      }
+      #infoIcon {
+        font-size: 1.2rem;
+        width: 24px; 
+        height: 24px;
+        line-height: 24px;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- 1) Load UAParser.js from CDN -->
-<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.31/dist/ua-parser.min.js"></script>
-
-<script>
-  /* 
-    This script:
-    - Creates a spinner
-    - After a short delay, parses the user agent
-    - Shows main <h1>, then a "Kontrola požadavků" section, 
-      then "Ke stažení" section
-    - Checks both Microsoft Edge and the Company Portal 
-      in each OS scenario
-    - For the Company Portal check row, we always show 
-      an orange question mark (?) since we can't detect installation
-    - Finally, we have a link to OKbase
-  */
-
-  // Create a loading spinner
-  const spinner = document.createElement('div');
-  spinner.className = 'spinner';
-  document.body.appendChild(spinner);
-
-  // Simulate a small loading delay
-  setTimeout(() => {
-    runDetection();
-  }, 500);
-
-  function runDetection() {
-    // Remove spinner
-    document.body.removeChild(spinner);
-
-    // Parse user agent
-    const parser = new UAParser();
-    const result = parser.getResult();
-
-    // If no result or empty
-    if (!result || Object.keys(result).length === 0) {
-      const failH1 = document.createElement('h1');
-      failH1.textContent = 'X - Detekce selhala';
-      document.body.appendChild(failH1);
-      return;
-    }
-
-    // Explicit check for Chromium-based Edge
-    if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
-      result.browser.name = 'Edge';
-      result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
-    }
-
-    const osFamily      = result.os.name ? result.os.name.toLowerCase() : 'unknown';
-    const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
-
-    // Main headline
-    const h1 = document.createElement('h1');
-    document.body.appendChild(h1);
-
-    // Decide headline text
-    if (osFamily.includes('android')) {
-      h1.textContent = 'OKbase na zařízení Android';
-      displayAndroidChecks(result);
-
-    } else if (osFamily.includes('ios') || osFamily.includes('mac os')) {
-      h1.textContent = 'OKbase na zařízení Apple';
-      displayAppleChecks(browserFamily);
-
-    } else if (osFamily.includes('windows')) {
-      h1.textContent = 'OKbase na zařízení Windows';
-      displayWindowsChecks(browserFamily);
-
-    } else {
-      h1.textContent = 'X - Neznámé zařízení';
-    }
-
-    // Finally, separate with an <hr> and link to OKbase
-    const hr = document.createElement('hr');
-    document.body.appendChild(hr);
-
-    const okbaseLink = document.createElement('div');
-    okbaseLink.innerHTML = `
-      <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
-    `;
-    document.body.appendChild(okbaseLink);
-  }
-
-  /* -----------------------------------------------------------------------
-     ANDROID CHECKS
-  ------------------------------------------------------------------------ */
-  function displayAndroidChecks(result) {
-    // 1) Kontrola požadavků
-    const reqH2 = document.createElement('h2');
-    reqH2.textContent = 'Kontrola požadavků';
-    document.body.appendChild(reqH2);
-
-    const container = document.createElement('div');
-
-    // Minimální verze Android 10
-    const verOK = result.os.version && parseInt(result.os.version, 10) >= 10;
-    container.appendChild(createCheckRow('Minimální verze Android 10', verOK));
-
-    // Volné místo 140 MB => pretend it's OK
-    container.appendChild(createCheckRow('Volné místo 140 MB', true));
-
-    // Microsoft Edge
-    const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
-    container.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-
-    // Company Portal => We CANNOT detect installation => show an orange "?"
-    // We'll treat it as "unknown" state
-    container.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    document.body.appendChild(container);
-
-    // 2) Ke stažení
-    const dlH2 = document.createElement('h2');
-    dlH2.textContent = 'Ke stažení';
-    document.body.appendChild(dlH2);
-
-    const dlContainer = document.createElement('div');
-
-    // If Edge not installed => show link
-    if (!edgeInstalled) {
-      const edgeLink = document.createElement('div');
-      edgeLink.className = 'link';
-      edgeLink.innerHTML = `
-        Stáhněte Microsoft Edge:
-        <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">
-          Google Play
-        </a>
-      `;
-      dlContainer.appendChild(edgeLink);
-    }
-
-    // Always show link to Company Portal
-    const portalLink = document.createElement('div');
-    portalLink.className = 'link';
-    portalLink.innerHTML = `
-      Stáhněte Portál společnosti:
-      <a href="https://play.google.com/store/apps/details?id=com.microsoft.portal" target="_blank">
-        Google Play
+  <!-- 1) Navbar with Logo -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <!-- Miele Logo -->
+      <a class="navbar-brand" href="#">
+        <img src="https://www.miele.cz/assets/miele_logo.png" alt="Miele Logo">
       </a>
-    `;
-    dlContainer.appendChild(portalLink);
-
-    document.body.appendChild(dlContainer);
-  }
-
-  /* -----------------------------------------------------------------------
-     APPLE (iOS/macOS) CHECKS
-  ------------------------------------------------------------------------ */
-  function displayAppleChecks(browserFamily) {
-    // Kontrola požadavků
-    const reqH2 = document.createElement('h2');
-    reqH2.textContent = 'Kontrola požadavků';
-    document.body.appendChild(reqH2);
-
-    const container = document.createElement('div');
-
-    // Check Microsoft Edge
-    // iOS doesn't let us truly detect if it's installed,
-    // but let's see if user agent claims "Edge".
-    const edgeInstalled = (browserFamily === 'edge');
-    container.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-
-    // Company Portal => we can't detect installation => "?"
-    container.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    document.body.appendChild(container);
-
-    // Ke stažení
-    const dlH2 = document.createElement('h2');
-    dlH2.textContent = 'Ke stažení';
-    document.body.appendChild(dlH2);
-
-    const dlContainer = document.createElement('div');
-
-    // If Edge not "installed"
-    if (!edgeInstalled) {
-      const edgeLink = document.createElement('div');
-      edgeLink.className = 'link';
-      edgeLink.innerHTML = `
-        Stáhněte Microsoft Edge:
-        <a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">
-          App Store
-        </a>
-      `;
-      dlContainer.appendChild(edgeLink);
+    </div>
+  </nav>
+  
+  <!-- 2) Info Icon -->
+  <div id="infoIcon">
+    <i class="bi bi-info-circle" data-bs-toggle="modal" data-bs-target="#infoModal" title="Informace"></i>
+  </div>
+  
+  <!-- 3) Spinner -->
+  <div class="spinner-container">
+    <div class="spinner-border text-danger" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <!-- 4) Main Content -->
+  <div class="container my-4" id="mainContent" style="display: none;">
+    <h1 id="headline" class="mb-4"></h1>
+    
+    <!-- Kontrola požadavků -->
+    <h2>Kontrola požadavků</h2>
+    <div id="requirements" class="mb-4">
+      <!-- Dynamické Check Rows Bude Zde -->
+    </div>
+    
+    <!-- Ke stažení -->
+    <h2>Ke stažení</h2>
+    <div id="downloads" class="mb-4">
+      <!-- Dynamické Download Links Bude Zde -->
+    </div>
+    
+    <!-- Link to OKbase -->
+    <hr>
+    <div class="text-center">
+      <a href="https://okbase2.miele.com" class="btn btn-primary" target="_blank">Přejít na OKbase</a>
+    </div>
+  </div>
+  
+  <!-- 5) Modal for Detailed Information -->
+  <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="infoModalLabel">Informace o zařízení</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modalContent">
+            <!-- Strukturované Informace z UAParser.js Budou Zde -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6) Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- 7) UAParser.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.31/dist/ua-parser.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      runDetection();
+    });
+    
+    function runDetection() {
+      // Hide Spinner and Show Main Content
+      const spinner = document.querySelector('.spinner-container');
+      spinner.style.display = 'none';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.style.display = 'block';
+      
+      // Initialize UAParser
+      const parser = new UAParser();
+      const result = parser.getResult();
+      
+      // Correct Edge Detection for Chromium-based Edge
+      if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
+        result.browser.name = 'Edge';
+        result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
+      }
+      
+      // Extract OS and Browser Information
+      let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
+      const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
+      
+      // Unify macOS and iOS to "iOS"
+      if (osFamily.includes('mac os') || osFamily.includes('ios')) {
+        osFamily = 'ios';
+      }
+      
+      // Set Dynamic Headline and Display Checks
+      const headline = document.getElementById('headline');
+      if (osFamily.includes('android')) {
+        headline.textContent = 'OKbase na zařízení Android';
+        displayAndroidChecks(result);
+      } else if (osFamily.includes('ios')) {
+        headline.textContent = 'OKbase na zařízení iOS';
+        displayIOSChecks(browserFamily);
+      } else if (osFamily.includes('windows')) {
+        headline.textContent = 'OKbase na zařízení Windows';
+        displayWindowsChecks(browserFamily);
+      } else {
+        headline.textContent = 'X - Neznámé zařízení';
+      }
+      
+      // Populate Modal with Structured Data
+      populateModal(result);
     }
-
-    // Company Portal link
-    const portalLink = document.createElement('div');
-    portalLink.className = 'link';
-    portalLink.innerHTML = `
-      Stáhněte Portál společnosti:
-      <a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">
-        App Store
-      </a>
-    `;
-    dlContainer.appendChild(portalLink);
-
-    document.body.appendChild(dlContainer);
-  }
-
-  /* -----------------------------------------------------------------------
-     WINDOWS CHECKS
-  ------------------------------------------------------------------------ */
-  function displayWindowsChecks(browserFamily) {
-    // Kontrola požadavků
-    const reqH2 = document.createElement('h2');
-    reqH2.textContent = 'Kontrola požadavků';
-    document.body.appendChild(reqH2);
-
-    const container = document.createElement('div');
-
-    // Check Edge
-    const edgeInstalled = (browserFamily === 'edge');
-    container.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-
-    // Company Portal => can't detect => "?"
-    container.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    document.body.appendChild(container);
-
-    // Ke stažení
-    const dlH2 = document.createElement('h2');
-    dlH2.textContent = 'Ke stažení';
-    document.body.appendChild(dlH2);
-
-    const dlContainer = document.createElement('div');
-
-    if (!edgeInstalled) {
-      const edgeLink = document.createElement('div');
-      edgeLink.className = 'link';
-      edgeLink.innerHTML = `
-        Stáhněte Microsoft Edge:
-        <a href="https://www.microsoft.com/edge" target="_blank">Oficiální stránka</a>
-      `;
-      dlContainer.appendChild(edgeLink);
+    
+    /* -----------------------------------------------------------------------
+       DISPLAY FUNCTIONS
+    ------------------------------------------------------------------------ */
+    
+    function displayAndroidChecks(result) {
+      const requirements = document.getElementById('requirements');
+      
+      // Minimální verze Android 10
+      const androidVersionOK = result.os.version && parseInt(result.os.version, 10) >= 10;
+      requirements.appendChild(createCheckRow('Minimální verze Android 10', androidVersionOK));
+      
+      // Volné místo 140 MB (Simulováno jako vždy OK)
+      requirements.appendChild(createCheckRow('Volné místo 140 MB', true));
+      
+      // Microsoft Edge
+      const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
+      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+      
+      // Portál společnosti (Vždy Neznámé)
+      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+      
+      // Populate Downloads
+      const downloads = document.getElementById('downloads');
+      
+      // If Edge is not installed, show download link
+      if (!edgeInstalled) {
+        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
+      }
+      
+      // Always show Company Portal download link
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.portal', 'Google Play'));
     }
-
-    // Portal link
-    const portalLink = document.createElement('div');
-    portalLink.className = 'link';
-    portalLink.innerHTML = `
-      Stáhněte Portál společnosti:
-      <a href="https://www.microsoft.com/store/productId/9WZDNCRFJ3PT" target="_blank">
-        Oficiální stránka
-      </a>
-    `;
-    dlContainer.appendChild(portalLink);
-
-    document.body.appendChild(dlContainer);
-  }
-
-  /* -----------------------------------------------------------------------
-     HELPER #1: createCheckRow(text, isOK)
-     Creates a <div> with "Text: ✔️/❌"
-  ------------------------------------------------------------------------ */
-  function createCheckRow(text, isOK) {
-    const row = document.createElement('div');
-    row.textContent = text + ': ';
-
-    const markSpan = document.createElement('span');
-    markSpan.textContent = isOK ? '✔️' : '❌';
-    markSpan.className = isOK ? 'mark ok' : 'mark unknown';
-
-    row.appendChild(markSpan);
-    return row;
-  }
-
-  /* -----------------------------------------------------------------------
-     HELPER #2: createCheckRowPortal(text)
-     Always an orange question mark, because JS can't detect installation
-  ------------------------------------------------------------------------ */
-  function createCheckRowPortal(text) {
-    const row = document.createElement('div');
-    row.textContent = text + ': ';
-
-    const markSpan = document.createElement('span');
-    markSpan.textContent = '?';
-    markSpan.className = 'mark unknown'; // orange color
-    row.appendChild(markSpan);
-
-    // e.g. "Portál společnosti: ?"
-    return row;
-  }
-</script>
-
+    
+    function displayIOSChecks(browserFamily) {
+      const requirements = document.getElementById('requirements');
+      
+      // Microsoft Edge (Nemůžeme spolehlivě detekovat instalaci na iOS)
+      const edgeInstalled = (browserFamily === 'edge');
+      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+      
+      // Portál společnosti (Vždy Neznámé)
+      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+      
+      // Populate Downloads
+      const downloads = document.getElementById('downloads');
+      
+      // If Edge is not installed, show download link
+      if (!edgeInstalled) {
+        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
+      }
+      
+      // Always show Company Portal download link
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
+    }
+    
+    function displayWindowsChecks(browserFamily) {
+      const requirements = document.getElementById('requirements');
+      
+      // Microsoft Edge
+      const edgeInstalled = (browserFamily === 'edge');
+      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+      
+      // Portál společnosti (Vždy Neznámé)
+      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+      
+      // Populate Downloads
+      const downloads = document.getElementById('downloads');
+      
+      // If Edge is not installed, show download link
+      if (!edgeInstalled) {
+        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
+      }
+      
+      // Always show Company Portal download link
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://www.microsoft.com/store/productId/9WZDNCRFJ3PT', 'Oficiální stránka'));
+    }
+    
+    /* -----------------------------------------------------------------------
+       HELPER FUNCTIONS
+    ------------------------------------------------------------------------ */
+    
+    function createCheckRow(text, isOK) {
+      const row = document.createElement('div');
+      row.className = 'check-row';
+      row.innerHTML = `
+        <span>${text}:</span>
+        <span class="mark ${isOK ? 'ok' : 'unknown'}">${isOK ? '✔️' : '❌'}</span>
+      `;
+      return row;
+    }
+    
+    function createCheckRowPortal(text) {
+      const row = document.createElement('div');
+      row.className = 'check-row';
+      row.innerHTML = `
+        <span>${text}:</span>
+        <span class="mark unknown">?</span>
+        <span class="text-muted ms-2">(Nelze zjistit)</span>
+      `;
+      return row;
+    }
+    
+    function createDownloadLink(appName, url, storeName) {
+      const linkDiv = document.createElement('div');
+      linkDiv.className = 'download-link';
+      linkDiv.innerHTML = `
+        <span>Stáhněte ${appName}:</span>
+        <a href="${url}" target="_blank">${storeName}</a>
+      `;
+      return linkDiv;
+    }
+    
+    /* -----------------------------------------------------------------------
+       MODAL POPULATION
+    ------------------------------------------------------------------------ */
+    
+    function populateModal(result) {
+      const modalContent = document.getElementById('modalContent');
+      modalContent.innerHTML = ''; // Clear any existing content
+      
+      const infoCards = [
+        { title: 'UA String', content: result.ua },
+        { title: 'Prohlížeč', content: formatObject(result.browser) },
+        { title: 'Operační Systém', content: formatObject(result.os) },
+        { title: 'Zařízení', content: formatObject(result.device) },
+        { title: 'Engine', content: formatObject(result.engine) },
+        { title: 'CPU', content: formatObject(result.cpu) }
+      ];
+      
+      infoCards.forEach(card => {
+        const section = document.createElement('div');
+        section.className = 'mb-3';
+        
+        const title = document.createElement('h5');
+        title.textContent = card.title;
+        section.appendChild(title);
+        
+        const content = document.createElement('pre');
+        content.textContent = card.content;
+        section.appendChild(content);
+        
+        modalContent.appendChild(section);
+      });
+    }
+    
+    function formatObject(obj) {
+      if (!obj || Object.keys(obj).length === 0) {
+        return 'Neznámé';
+      }
+      return JSON.stringify(obj, null, 2);
+    }
+  </script>
+  
 </body>
 </html>
