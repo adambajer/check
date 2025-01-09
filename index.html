@@ -78,65 +78,77 @@
 </div>
 
 <!-- 3) Detect.js z CDN (jsDelivr) -->
-<script src="https://raw.githubusercontent.com/darcyclarke/Detect.js/refs/heads/master/detect.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/gh/darcyclarke/Detect.js@master/detect.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Dáme drobný odklad, aby spinner byl vidět
-  setTimeout(() => {
-    runDetection();
-  }, 1000);
-});
+  // Verify Detect.js is loaded
+  console.log('Detect.js loaded:', typeof Detect !== 'undefined');
 
-function runDetection() {
-  const spinner     = document.getElementById('loadingSpinner');
-  const mainContent = document.getElementById('mainContent');
-  const headline    = document.getElementById('headline');
-  const info        = detect.parse(navigator.userAgent);
+  document.addEventListener('DOMContentLoaded', () => {
+    // Dáme drobný odklad, aby spinner byl vidět
+    setTimeout(() => {
+      runDetection();
+    }, 1000);
+  });
 
-  spinner.style.display     = 'none';
-  mainContent.style.display = 'block';
-
-  let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
-  let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
-
-  const androidChecks = document.getElementById('androidChecks');
-  const windowsChecks = document.getElementById('windowsChecks');
-
-  // 1) Android => 4 řádky
-  if (osFamily.includes('android')) {
-    headline.textContent = 'OKbase na zařízení Android';
-    androidChecks.style.display = 'block';
-
-    // Edge => #edgeAndroid => "✔️" / "?"
-    if (brFamily.includes('edge')) {
-      const edgeEl = document.getElementById('edgeAndroid');
-      edgeEl.textContent = '✔️';
-      edgeEl.classList.remove('unknown');
-      edgeEl.classList.add('ok');
+  function runDetection() {
+    const spinner     = document.getElementById('loadingSpinner');
+    const mainContent = document.getElementById('mainContent');
+    const headline    = document.getElementById('headline');
+    
+    // Ensure Detect is available
+    if (typeof Detect === 'undefined') {
+      console.error('Detect.js is not loaded.');
+      spinner.style.display     = 'none';
+      mainContent.style.display = 'block';
+      headline.textContent = 'X - Detekce selhala';
+      return;
     }
 
-  // 2) Apple => "OKbase na zařízení Apple"
-  } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
-    headline.textContent = 'OKbase na zařízení Apple';
+    const info = Detect.parse(navigator.userAgent);
 
-  // 3) Windows => "OKbase na zařízení Windows", 1 řádek pro Edge
-  } else if (osFamily.includes('windows')) {
-    headline.textContent = 'OKbase na zařízení Windows';
-    windowsChecks.style.display = 'block';
+    spinner.style.display     = 'none';
+    mainContent.style.display = 'block';
 
-    if (brFamily.includes('edge')) {
-      const we = document.getElementById('edgeWindows');
-      we.textContent = '✔️';
-      we.classList.remove('unknown');
-      we.classList.add('ok');
+    let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
+    let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
+
+    const androidChecks = document.getElementById('androidChecks');
+    const windowsChecks = document.getElementById('windowsChecks');
+
+    // 1) Android => 4 řádky
+    if (osFamily.includes('android')) {
+      headline.textContent = 'OKbase na zařízení Android';
+      androidChecks.style.display = 'block';
+
+      // Edge => #edgeAndroid => "✔️" / "?"
+      if (brFamily.includes('edge')) {
+        const edgeEl = document.getElementById('edgeAndroid');
+        edgeEl.textContent = '✔️';
+        edgeEl.classList.remove('unknown');
+        edgeEl.classList.add('ok');
+      }
+
+    // 2) Apple => "OKbase na zařízení Apple"
+    } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
+      headline.textContent = 'OKbase na zařízení Apple';
+
+    // 3) Windows => "OKbase na zařízení Windows", 1 řádek pro Edge
+    } else if (osFamily.includes('windows')) {
+      headline.textContent = 'OKbase na zařízení Windows';
+      windowsChecks.style.display = 'block';
+
+      if (brFamily.includes('edge')) {
+        const we = document.getElementById('edgeWindows');
+        we.textContent = '✔️';
+        we.classList.remove('unknown');
+        we.classList.add('ok');
+      }
+
+    // 4) Neznámé => křížek v nadpisu
+    } else {
+      headline.textContent = 'X';
     }
-
-  // 4) Neznámé => křížek v nadpisu
-  } else {
-    headline.textContent = 'X';
   }
-}
 </script>
 
 </body>
