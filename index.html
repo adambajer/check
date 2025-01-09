@@ -3,127 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OKbase na zařízení</title>
+  <title>OKbase + Detect.js (Spinner + Různé OS)</title>
   <style>
     body {
       margin: 1rem;
       font-family: sans-serif;
     }
-    h1 {
-      margin-bottom: 1rem;
+    h1 { margin-bottom: 1rem; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 5px solid #ccc;
+      border-top-color: #0078d7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 2rem auto;
     }
-    /* Vizuální značení */
-    .mark {
-      font-weight: bold;
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loadingSpinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .ok {
-      color: green;     /* pro Edge, je-li detekován => "✔️" */
-    }
-    .unknown {
-      color: orange;    /* "?" */
-    }
-    /* Responzivita */
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.95rem;
-      }
-      h1 {
-        font-size: 1.1rem;
-      }
+    #mainContent { display: none; }
+    .mark { font-weight: bold; }
+    .ok { color: green; }
+    .unknown { color: orange; }
+    @media (max-width:600px) {
+      body { font-size:0.95rem; }
+      h1 { font-size:1.1rem; }
+      .spinner { width:30px; height:30px; }
     }
   </style>
 </head>
 <body>
 
-<h1 id="headline"></h1>
+<!-- 1) Spinner -->
+<div id="loadingSpinner">
+  <div class="spinner"></div>
+</div>
 
-<!-- Pouze u Androidu zobrazíme 2 řádky (verze, volné místo), jinde hidden -->
-<div id="androidExtra" style="display: none;">
-  <ul>
+<!-- 2) Hlavní obsah, initially hidden -->
+<div id="mainContent">
+  <h1 id="headline"></h1>
+
+  <!-- Pro Android => 4 řádky -->
+  <ul id="androidChecks" style="display:none;">
     <li>Minimální verze Android 10: <span class="mark unknown">?</span></li>
     <li>Volné místo 140 MB: <span class="mark unknown">?</span></li>
+    <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
+    <li>Portál společnosti: <span class="mark unknown">?</span></li>
   </ul>
+
+  <!-- Pouze Windows => 1 řádek pro Edge -->
+  <ul id="windowsChecks" style="display:none;">
+    <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
+  </ul>
+
+  <!-- Apple => nic speciálního -->
+  
+  <!-- Odkaz OKbase vždy -->
+  <div>
+    <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
+  </div>
 </div>
 
-<!-- Pro všechny OS: Edge a Portál společnosti -->
-<ul>
-  <li>Microsoft Edge: 
-    <span id="edgeMark" class="mark unknown">?</span>
-    <!-- Kdybychom chtěli v budoucnu link, přidali bychom ho sem. -->
-  </li>
-  <li>Portál společnosti: 
-    <span class="mark unknown">?</span>
-    <!-- Link, liší se dle OS → doplníme v JS -->
-    <span id="companyLink" style="display: inline;">
-      – <a id="companyLinkA" href="#" target="_blank">Stáhnout Portál společnosti</a>
-    </span>
-  </li>
-</ul>
-
-<!-- Odkaz OKbase vždy -->
-<div>
-  <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
-</div>
+<!-- detect.js (stažený z GitHubu) -->
+<script src="./detect.js"></script>
 
 <script>
-// 1) Rozlišení OS
-function detectOS() {
-  const ua = navigator.userAgent;
-  if (/android/i.test(ua)) return "Android";
-  if (/iPad|iPhone|iPod/.test(ua)) return "Apple";
-  if (/Windows/i.test(ua)) return "Windows";
-  return "Neznámé";
-}
-
-// 2) Detekce Edge
-async function isEdgeBrowser() {
-  // Novější brand info
-  if (navigator.userAgentData && navigator.userAgentData.brands) {
-    const brands = navigator.userAgentData.brands.map(b => b.brand.toLowerCase());
-    return brands.includes('microsoft edge');
-  }
-  // Fallback
-  return /Edg\//i.test(navigator.userAgent);
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const headline       = document.getElementById('headline');
-  const androidExtra   = document.getElementById('androidExtra');
-  const edgeMark       = document.getElementById('edgeMark');
-  const companyLinkA   = document.getElementById('companyLinkA');
-
-  // 3) Určím OS => nadpis + jestli zobrazit androidExtra
-  const os = detectOS();
-  if (os === "Android") {
-    headline.textContent = "OKbase na zařízení Android";
-    androidExtra.style.display = "block";
-    // Portál link => Google Play
-    companyLinkA.href = "https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal";
-
-  } else if (os === "Apple") {
-    headline.textContent = "OKbase na zařízení Apple";
-    // Portál link => iOS App Store
-    companyLinkA.href = "https://apps.apple.com/us/app/intune-company-portal/id719725942";
-
-  } else if (os === "Windows") {
-    headline.textContent = "OKbase na zařízení Windows";
-    // Portál link => Microsoft Store
-    companyLinkA.href = "https://apps.microsoft.com/store/detail/intune-company-portal/9WZDNCRFJ3PZ";
-
-  } else {
-    headline.textContent = "OKbase na neznámém zařízení";
-    // Portál link => nic moc
-    companyLinkA.href = "#";
-  }
-
-  // 4) Microsoft Edge => "✔️" / "?"
-  const isEdge = await isEdgeBrowser();
-  if (isEdge) {
-    edgeMark.textContent = "✔️";
-    edgeMark.classList.remove("unknown");
-    edgeMark.classList.add("ok");
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    runDetection();
+  }, 600);
 });
+
+async function runDetection() {
+  const spinner       = document.getElementById('loadingSpinner');
+  const mainContent   = document.getElementById('mainContent');
+  const headline      = document.getElementById('headline');
+  const androidChecks = document.getElementById('androidChecks');
+  const windowsChecks = document.getElementById('windowsChecks');
+  const info          = detect.parse(navigator.userAgent);
+
+  spinner.style.display     = 'none';
+  mainContent.style.display = 'block';
+
+  // OS:
+  let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
+  // Browser:
+  let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
+
+  // 1) Android => 4 řádky
+  if (osFamily.includes('android')) {
+    headline.textContent = 'OKbase na zařízení Android';
+    androidChecks.style.display = 'block';
+
+    // Microsoft Edge => #edgeAndroid => "✔️" / "?"
+    if (brFamily.includes('edge')) {
+      let edgeEl = document.getElementById('edgeAndroid');
+      edgeEl.textContent = '✔️';
+      edgeEl.classList.remove('unknown');
+      edgeEl.classList.add('ok');
+    }
+
+  // 2) Apple => "OKbase na zařízení Apple"
+  } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
+    headline.textContent = 'OKbase na zařízení Apple';
+
+  // 3) Windows => "OKbase na zařízení Windows" + 1 řádek pro Edge
+  } else if (osFamily.includes('windows')) {
+    headline.textContent = 'OKbase na zařízení Windows';
+    windowsChecks.style.display = 'block';
+
+    // #edgeWindows => "✔️" / "?"
+    if (brFamily.includes('edge')) {
+      let we = document.getElementById('edgeWindows');
+      we.textContent = '✔️';
+      we.classList.remove('unknown');
+      we.classList.add('ok');
+    }
+
+  // 4) Neznámé => "X"
+  } else {
+    headline.textContent = 'X';
+  }
+}
 </script>
 
 </body>
