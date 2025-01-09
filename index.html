@@ -75,16 +75,16 @@
       <li>Volné místo 140 MB: <span class="mark unknown" id="androidSpace">?</span></li>
       <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
       <li>Portál společnosti: <span class="mark unknown" id="androidPortal">?</span></li>
-      <!-- Placeholder for Edge Link -->
+      <!-- Link to Microsoft Edge on Google Play if requirements aren't met -->
       <li id="edgeLinkAndroid" style="display:none;">
-        Stáhněte Microsoft Edge: <a href="#" target="_blank">Google Play</a>
+        Stáhněte Microsoft Edge: <a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx" target="_blank">Google Play</a>
       </li>
     </ul>
 
     <!-- Windows Specific Checks -->
     <ul id="windowsChecks" style="display:none;">
       <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
-      <!-- Placeholder for Edge Link on Windows if needed -->
+      <!-- Link to Microsoft Edge download page if Edge isn't detected -->
       <li id="edgeLinkWindows" style="display:none;">
         Stáhněte Microsoft Edge: <a href="https://www.microsoft.com/edge" target="_blank">Oficiální stránka</a>
       </li>
@@ -93,9 +93,9 @@
     <!-- Apple Specific Checks -->
     <ul id="appleChecks" style="display:none;">
       <li>Portál společnosti: <span class="mark unknown" id="applePortal">?</span></li>
-      <!-- Placeholder for Edge Link -->
+      <!-- Link to Microsoft Edge on Apple App Store -->
       <li id="edgeLinkApple" style="display:none;">
-        Stáhněte Microsoft Edge: <a href="#" target="_blank">App Store</a>
+        Stáhněte Microsoft Edge: <a href="https://apps.apple.com/app/microsoft-edge/id1288723196" target="_blank">App Store</a>
       </li>
     </ul>
 
@@ -216,7 +216,7 @@
 
         // Portál Společnosti should always be '?', with a link
         const androidPortalEl = document.getElementById('androidPortal');
-        androidPortalEl.innerHTML = '<a href="https://portal.company.com" target="_blank">?</a>'; // Replace with actual portal URL
+        androidPortalEl.innerHTML = '<a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs" target="_blank">? Stáhněte si Portál společnosti</a>'; // Replace with actual portal URL
 
       }
       // 6.11. Apple (iOS) Detection Logic
@@ -226,7 +226,7 @@
 
         // Portál Společnosti should always be '?', with a link
         const applePortalEl = document.getElementById('applePortal');
-        applePortalEl.innerHTML = '<a href="https://portal.company.com" target="_blank">?</a>'; // Replace with actual portal URL
+        applePortalEl.innerHTML = '<a href="https://apps.apple.com/cz/app/intune-company-portal/id719171358?l=cs" target="_blank">? Stáhněte si Portál společnosti</a>'; // Replace with actual portal URL
 
         // Provide link to Microsoft Edge on App Store
         const edgeLinkApple = document.getElementById('edgeLinkApple');
