@@ -30,7 +30,7 @@
     
     /* Navbar Styling */
     .navbar {
-      background-color: var(--miele-red);
+      background-color: var(--miele-black); /* Černé pozadí navbaru */
       padding: 0.5rem 1rem;
     }
     .navbar-brand {
@@ -118,6 +118,7 @@
       top: 1rem;
       right: 1rem;
       z-index: 1050; /* Nad ostatními prvky */
+      font-size: 1.5rem; /* Konzistentní velikost */
     }
     
     /* Responsivní úpravy */
@@ -245,15 +246,19 @@
       const headline = document.getElementById('headline');
       if (osFamily.includes('android')) {
         headline.textContent = 'OKbase na zařízení Android';
+        document.title = 'OKbase + Android';
         displayAndroidChecks(result);
       } else if (osFamily.includes('ios')) {
         headline.textContent = 'OKbase na zařízení iOS';
+        document.title = 'OKbase + iOS';
         displayIOSChecks(browserFamily);
       } else if (osFamily.includes('windows')) {
         headline.textContent = 'OKbase na zařízení Windows';
+        document.title = 'OKbase + Windows';
         displayWindowsChecks(browserFamily);
       } else {
         headline.textContent = 'X - Neznámé zařízení';
+        document.title = 'X - Neznámé zařízení';
       }
       
       // Populate Modal with Structured Data
