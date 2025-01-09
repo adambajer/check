@@ -80,7 +80,7 @@
 </div>
 
 <!-- 3) Detect.js z CDN (jsDelivr) -->
-<script src="https://cdn.jsdelivr.net/gh/darcyclarke/Detect.js@master/detect.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/darcyclarke/Detect.js@master/detect.js"></script>
 <script>
   // Verify Detect.js is loaded
   console.log('Detect.js loaded:', typeof Detect !== 'undefined');
@@ -146,7 +146,7 @@
       androidSpaceEl.classList.remove('unknown');
       androidSpaceEl.classList.add('ok');
 
-      // Edge => #edgeAndroid => "✔️" / "?"
+      // Edge => #edgeAndroid => "✔️" / "❌"
       const edgeAndroidEl = document.getElementById('edgeAndroid');
       if (brFamily.includes('edge')) {
         edgeAndroidEl.textContent = '✔️';
@@ -154,6 +154,8 @@
         edgeAndroidEl.classList.add('ok');
       } else {
         edgeAndroidEl.textContent = '❌';
+        edgeAndroidEl.classList.remove('unknown');
+        edgeAndroidEl.classList.add('unknown');
       }
 
       // Portal Check (placeholder logic)
@@ -187,6 +189,8 @@
         edgeWindowsEl.classList.add('ok');
       } else {
         edgeWindowsEl.textContent = '❌';
+        edgeWindowsEl.classList.remove('unknown');
+        edgeWindowsEl.classList.add('unknown');
       }
 
     // 4) Neznámé => křížek v nadpisu
