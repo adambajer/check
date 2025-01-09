@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OKbase + Detect.js (CDN) Demo</title>
+  <title>OKbase + Detect.js (Local Hosting) Demo</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Optional: Add a favicon -->
   <style>
     body {
       margin: 1rem;
       font-family: sans-serif;
     }
     h1 { margin-bottom: 1rem; }
-    /* Spinner + animace */
+    /* Spinner + Animace */
     .spinner {
       width: 50px; height: 50px;
       border: 5px solid #ccc;
@@ -79,14 +80,14 @@
   </div>
 </div>
 
-<!-- 3) Detect.js z CDN (jsDelivr) -->
-<script src="https://cdn.jsdelivr.net/gh/darcyclarke/Detect.js@master/detect.js"></script>
+<!-- 3) Detect.js Hosted Locally -->
+<script src="js/detect.js"></script>
 <script>
   // Verify Detect.js is loaded
   console.log('Detect.js loaded:', typeof Detect !== 'undefined');
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Dáme drobný odklad, aby spinner byl vidět
+    // Allow spinner to be visible for a brief moment
     setTimeout(() => {
       runDetection();
     }, 1000);
@@ -129,7 +130,7 @@
       headline.textContent = 'OKbase na zařízení Android';
       androidChecks.style.display = 'block';
 
-      // Example: Check Android version (assuming info.os.version exists)
+      // Check Android version (assuming info.os.version exists)
       const androidVersionEl = document.getElementById('androidVersion');
       if (info.os.version && parseInt(info.os.version, 10) >= 10) {
         androidVersionEl.textContent = '✔️';
@@ -137,16 +138,18 @@
         androidVersionEl.classList.add('ok');
       } else {
         androidVersionEl.textContent = '❌';
+        androidVersionEl.classList.remove('unknown');
+        androidVersionEl.classList.add('unknown');
       }
 
-      // Example: Check free space (placeholder logic)
+      // Check free space (placeholder logic)
       const androidSpaceEl = document.getElementById('androidSpace');
       // Implement actual free space check if possible
       androidSpaceEl.textContent = '✔️';
       androidSpaceEl.classList.remove('unknown');
       androidSpaceEl.classList.add('ok');
 
-      // Edge => #edgeAndroid => "✔️" / "❌"
+      // Check for Microsoft Edge
       const edgeAndroidEl = document.getElementById('edgeAndroid');
       if (brFamily.includes('edge')) {
         edgeAndroidEl.textContent = '✔️';
@@ -170,7 +173,7 @@
       headline.textContent = 'OKbase na zařízení Apple';
       appleChecks.style.display = 'block';
 
-      // Example: Portal Check (placeholder logic)
+      // Portal Check (placeholder logic)
       const applePortalEl = document.getElementById('applePortal');
       // Implement actual portal availability check if possible
       applePortalEl.textContent = '✔️';
