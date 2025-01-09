@@ -3,132 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OKbase + Detect.js (Spinner + Různé OS)</title>
+  <title>OKbase + Detect.js Demo</title>
   <style>
     body {
       margin: 1rem;
       font-family: sans-serif;
     }
     h1 { margin-bottom: 1rem; }
+    /* Spinner + animace */
     .spinner {
-      width: 40px; height: 40px;
+      width: 50px; height: 50px;
       border: 5px solid #ccc;
       border-top-color: #0078d7;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 2rem auto;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
     #loadingSpinner {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    #mainContent { display: none; }
-    .mark { font-weight: bold; }
-    .ok { color: green; }
-    .unknown { color: orange; }
-    @media (max-width:600px) {
-      body { font-size:0.95rem; }
-      h1 { font-size:1.1rem; }
-      .spinner { width:30px; height:30px; }
+    /* Obsah */
+    #mainContent {
+      display: none; /* hidden until detection is done */
+    }
+    .mark {
+      font-weight: bold;
+    }
+    .ok {
+      color: green;
+    }
+    .unknown {
+      color: orange;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.95rem;
+      }
+      h1 {
+        font-size: 1.1rem;
+      }
+      .spinner {
+        width: 30px; height: 30px;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- 1) Spinner -->
+<!-- Spinner -->
 <div id="loadingSpinner">
   <div class="spinner"></div>
 </div>
 
-<!-- 2) Hlavní obsah, initially hidden -->
+<!-- Obsah -->
 <div id="mainContent">
   <h1 id="headline"></h1>
 
-  <!-- Pro Android => 4 řádky -->
-  <ul id="androidChecks" style="display:none;">
+  <!-- Pro Android: 4 řádky -->
+  <ul id="androidChecks" style="display: none;">
     <li>Minimální verze Android 10: <span class="mark unknown">?</span></li>
     <li>Volné místo 140 MB: <span class="mark unknown">?</span></li>
     <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
     <li>Portál společnosti: <span class="mark unknown">?</span></li>
   </ul>
 
-  <!-- Pouze Windows => 1 řádek pro Edge -->
-  <ul id="windowsChecks" style="display:none;">
+  <!-- Pro Windows: 1 řádek pro Edge -->
+  <ul id="windowsChecks" style="display: none;">
     <li>Microsoft Edge: <span id="edgeWindows" class="mark unknown">?</span></li>
   </ul>
 
   <!-- Apple => nic speciálního -->
-  
+  <!-- Neznámé => křížek do nadpisu -->
+
   <!-- Odkaz OKbase vždy -->
   <div>
     <a href="https://okbase2.miele.com" target="_blank">Přejít na OKbase</a>
   </div>
 </div>
 
-<!-- detect.js (stažený z GitHubu) -->
+<!-- 1) Zde MUSÍ být detect.js - 
+     stáhněte z https://github.com/darcyclarke/Detect.js, 
+     uložte do STEJNÉ složky a pojmenujte "detect.js" 
+-->
 <script src="./detect.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // Dáme krátkou prodlevu, aby spinner byl vidět
   setTimeout(() => {
     runDetection();
-  }, 600);
+  }, 1000); 
 });
 
-async function runDetection() {
-  const spinner       = document.getElementById('loadingSpinner');
-  const mainContent   = document.getElementById('mainContent');
-  const headline      = document.getElementById('headline');
+function runDetection() {
+  const spinner    = document.getElementById('loadingSpinner');
+  const mainC      = document.getElementById('mainContent');
+  const headline   = document.getElementById('headline');
+  const info       = detect.parse(navigator.userAgent);
+
+  // Schová spinner, zobraz main
+  spinner.style.display = 'none';
+  mainC.style.display   = 'block';
+
+  // Získáme OS a Browser z detect.js
+  let osFamily  = info?.os?.family?.toLowerCase() || '';
+  let brFamily  = info?.browser?.family?.toLowerCase() || '';
+
   const androidChecks = document.getElementById('androidChecks');
   const windowsChecks = document.getElementById('windowsChecks');
-  const info          = detect.parse(navigator.userAgent);
 
-  spinner.style.display     = 'none';
-  mainContent.style.display = 'block';
-
-  // OS:
-  let osFamily = (info.os && info.os.family) ? info.os.family.toLowerCase() : 'unknown';
-  // Browser:
-  let brFamily = (info.browser && info.browser.family) ? info.browser.family.toLowerCase() : 'unknown';
-
-  // 1) Android => 4 řádky
+  // 1) Android
   if (osFamily.includes('android')) {
     headline.textContent = 'OKbase na zařízení Android';
     androidChecks.style.display = 'block';
 
-    // Microsoft Edge => #edgeAndroid => "✔️" / "?"
+    // Microsoft Edge v Android => #edgeAndroid => "✔️" / "?"
     if (brFamily.includes('edge')) {
-      let edgeEl = document.getElementById('edgeAndroid');
+      const edgeEl = document.getElementById('edgeAndroid');
       edgeEl.textContent = '✔️';
       edgeEl.classList.remove('unknown');
       edgeEl.classList.add('ok');
     }
 
-  // 2) Apple => "OKbase na zařízení Apple"
+  // 2) iOS (Apple)
   } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
     headline.textContent = 'OKbase na zařízení Apple';
 
-  // 3) Windows => "OKbase na zařízení Windows" + 1 řádek pro Edge
+  // 3) Windows
   } else if (osFamily.includes('windows')) {
     headline.textContent = 'OKbase na zařízení Windows';
     windowsChecks.style.display = 'block';
 
     // #edgeWindows => "✔️" / "?"
     if (brFamily.includes('edge')) {
-      let we = document.getElementById('edgeWindows');
-      we.textContent = '✔️';
-      we.classList.remove('unknown');
-      we.classList.add('ok');
+      const edgeEl = document.getElementById('edgeWindows');
+      edgeEl.textContent = '✔️';
+      edgeEl.classList.remove('unknown');
+      edgeEl.classList.add('ok');
     }
 
-  // 4) Neznámé => "X"
+  // 4) Neznámé => křížek
   } else {
     headline.textContent = 'X';
   }
 }
 </script>
-
 </body>
 </html>
