@@ -14,9 +14,10 @@
   <style>
     /* Miele Branding Colors */
     :root {
-      --miele-red: #E4002B;
+      --miele-red: #E4002B; /* Primární barva */
       --miele-black: #000000;
       --miele-white: #FFFFFF;
+      --miele-grey: #6c757d; /* Pro texty a popisky */
     }
     
     body {
@@ -30,10 +31,20 @@
     /* Navbar Styling */
     .navbar {
       background-color: var(--miele-red);
+      padding: 0.5rem 1rem;
+    }
+    .navbar-brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 200px; /* Šířka loga */
     }
     .navbar-brand img {
-      height: 40px;
+      width: 100%;
+      height: auto;
     }
+    
+    /* Info Icon Styling */
     .info-icon {
       color: var(--miele-white);
       font-size: 1.5rem;
@@ -57,6 +68,7 @@
     .check-row .mark {
       font-weight: bold;
       margin-left: 0.5rem;
+      font-size: 1.2rem;
     }
     .check-row .unknown {
       color: orange;
@@ -68,22 +80,36 @@
     /* Download Links Styling */
     .download-link {
       margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .download-link a {
+      color: var(--miele-red);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .download-link a:hover {
+      text-decoration: underline;
     }
     
     /* Modal Styling */
     .modal-header {
       background-color: var(--miele-red);
       color: var(--miele-white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .modal-title {
-      margin: 0 auto;
+      margin: 0;
+      font-size: 1.5rem;
     }
     
     .modal-body pre {
       background-color: #f8f9fa;
       padding: 1rem;
       border-radius: 0.25rem;
+      font-size: 0.9rem;
     }
     
     /* Info Icon Positioning */
@@ -91,41 +117,44 @@
       position: fixed;
       top: 1rem;
       right: 1rem;
-      z-index: 1050; /* Above other elements */
+      z-index: 1050; /* Nad ostatními prvky */
     }
     
-    /* Responsive tweak */
+    /* Responsivní úpravy */
     @media (max-width: 600px) {
-      body { font-size: 0.95rem; }
-      .spinner {
-        width: 30px;
-        height: 30px;
+      .navbar-brand {
+        width: 150px; /* Menší logo na mobilu */
       }
-      #infoIcon {
+      .info-icon {
         font-size: 1.2rem;
-        width: 24px; 
-        height: 24px;
-        line-height: 24px;
+      }
+      .check-row .mark {
+        font-size: 1rem;
+      }
+      .download-link {
+        font-size: 1rem;
+      }
+      .modal-title {
+        font-size: 1.2rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 1) Navbar with Logo -->
+  <!-- 1) Navbar with Centered Logo -->
   <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <!-- Miele Logo -->
+    <div class="container-fluid justify-content-center">
+      <!-- Logo.png umístěné ve stejné složce jako HTML soubor -->
       <a class="navbar-brand" href="#">
-        <!-- Nahraďte níže uvedený src skutečným URL loga Miele -->
-        <img src="https://www.miele.cz/assets/miele_logo.png" alt="Miele Logo">
+        <img src="logo.png" alt="Miele Logo">
       </a>
     </div>
   </nav>
   
-  <!-- 2) Info Icon -->
+  <!-- 2) Info Icon in Top-Right Corner -->
   <div id="infoIcon">
-    <i class="bi bi-info-circle" data-bs-toggle="modal" data-bs-target="#infoModal" title="Informace"></i>
+    <i class="bi bi-info-circle info-icon" data-bs-toggle="modal" data-bs-target="#infoModal" title="Informace"></i>
   </div>
   
   <!-- 3) Spinner -->
@@ -137,7 +166,7 @@
   
   <!-- 4) Main Content -->
   <div class="container my-4" id="mainContent" style="display: none;">
-    <h1 id="headline" class="mb-4"></h1>
+    <h1 id="headline" class="mb-4 text-center"></h1>
     
     <!-- Kontrola požadavků -->
     <h2>Kontrola požadavků</h2>
@@ -160,7 +189,7 @@
   
   <!-- 5) Modal for Detailed Information -->
   <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="infoModalLabel">Informace o zařízení</h5>
