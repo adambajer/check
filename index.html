@@ -57,10 +57,10 @@
 
   <!-- Pouze Android => 4 řádky -->
   <ul id="androidChecks" style="display:none;">
-    <li>Minimální verze Android 10: <span class="mark unknown">?</span></li>
-    <li>Volné místo 140 MB: <span class="mark unknown">?</span></li>
+    <li>Minimální verze Android 10: <span class="mark unknown" id="androidVersion">?</span></li>
+    <li>Volné místo 140 MB: <span class="mark unknown" id="androidSpace">?</span></li>
     <li>Microsoft Edge: <span id="edgeAndroid" class="mark unknown">?</span></li>
-    <li>Portál společnosti: <span class="mark unknown">?</span></li>
+    <li>Portál společnosti: <span class="mark unknown" id="androidPortal">?</span></li>
   </ul>
 
   <!-- Windows => 1 řádek pro Edge -->
@@ -69,7 +69,9 @@
   </ul>
 
   <!-- Apple => jen nadpis (poslední) -->
-  <!-- Neznámé => "X" -->
+  <ul id="appleChecks" style="display:none;">
+    <li>Portál společnosti: <span class="mark unknown" id="applePortal">?</span></li>
+  </ul>
 
   <!-- Odkaz OKbase vždy -->
   <div>
@@ -94,7 +96,7 @@
     const spinner     = document.getElementById('loadingSpinner');
     const mainContent = document.getElementById('mainContent');
     const headline    = document.getElementById('headline');
-    
+
     // Ensure Detect is available
     if (typeof Detect === 'undefined') {
       console.error('Detect.js is not loaded.');
@@ -114,39 +116,82 @@
 
     const androidChecks = document.getElementById('androidChecks');
     const windowsChecks = document.getElementById('windowsChecks');
+    const appleChecks   = document.getElementById('appleChecks');
+
+    // Reset UI
+    headline.textContent = '';
+    androidChecks.style.display = 'none';
+    windowsChecks.style.display = 'none';
+    appleChecks.style.display = 'none';
 
     // 1) Android => 4 řádky
     if (osFamily.includes('android')) {
       headline.textContent = 'OKbase na zařízení Android';
       androidChecks.style.display = 'block';
 
-      // Edge => #edgeAndroid => "✔️" / "?"
-      if (brFamily.includes('edge')) {
-        const edgeEl = document.getElementById('edgeAndroid');
-        edgeEl.textContent = '✔️';
-        edgeEl.classList.remove('unknown');
-        edgeEl.classList.add('ok');
+      // Example: Check Android version (assuming info.os.version exists)
+      const androidVersionEl = document.getElementById('androidVersion');
+      if (info.os.version && parseInt(info.os.version, 10) >= 10) {
+        androidVersionEl.textContent = '✔️';
+        androidVersionEl.classList.remove('unknown');
+        androidVersionEl.classList.add('ok');
+      } else {
+        androidVersionEl.textContent = '❌';
       }
 
-    // 2) Apple => "OKbase na zařízení Apple"
+      // Example: Check free space (placeholder logic)
+      const androidSpaceEl = document.getElementById('androidSpace');
+      // Implement actual free space check if possible
+      androidSpaceEl.textContent = '✔️';
+      androidSpaceEl.classList.remove('unknown');
+      androidSpaceEl.classList.add('ok');
+
+      // Edge => #edgeAndroid => "✔️" / "?"
+      const edgeAndroidEl = document.getElementById('edgeAndroid');
+      if (brFamily.includes('edge')) {
+        edgeAndroidEl.textContent = '✔️';
+        edgeAndroidEl.classList.remove('unknown');
+        edgeAndroidEl.classList.add('ok');
+      } else {
+        edgeAndroidEl.textContent = '❌';
+      }
+
+      // Portal Check (placeholder logic)
+      const androidPortalEl = document.getElementById('androidPortal');
+      // Implement actual portal availability check if possible
+      androidPortalEl.textContent = '✔️';
+      androidPortalEl.classList.remove('unknown');
+      androidPortalEl.classList.add('ok');
+
+    // 2) Apple => Display relevant checks
     } else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad')) {
       headline.textContent = 'OKbase na zařízení Apple';
+      appleChecks.style.display = 'block';
 
-    // 3) Windows => "OKbase na zařízení Windows", 1 řádek pro Edge
+      // Example: Portal Check (placeholder logic)
+      const applePortalEl = document.getElementById('applePortal');
+      // Implement actual portal availability check if possible
+      applePortalEl.textContent = '✔️';
+      applePortalEl.classList.remove('unknown');
+      applePortalEl.classList.add('ok');
+
+    // 3) Windows => 1 řádek pro Edge
     } else if (osFamily.includes('windows')) {
       headline.textContent = 'OKbase na zařízení Windows';
       windowsChecks.style.display = 'block';
 
+      const edgeWindowsEl = document.getElementById('edgeWindows');
       if (brFamily.includes('edge')) {
-        const we = document.getElementById('edgeWindows');
-        we.textContent = '✔️';
-        we.classList.remove('unknown');
-        we.classList.add('ok');
+        edgeWindowsEl.textContent = '✔️';
+        edgeWindowsEl.classList.remove('unknown');
+        edgeWindowsEl.classList.add('ok');
+      } else {
+        edgeWindowsEl.textContent = '❌';
       }
 
     // 4) Neznámé => křížek v nadpisu
     } else {
-      headline.textContent = 'X';
+      headline.textContent = 'X - Neznámé zařízení';
     }
   }
 </script>
