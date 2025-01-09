@@ -46,6 +46,7 @@
     .ok   { color: green; }
     .unknown { color: orange; }
     .link { color: blue; text-decoration: underline; cursor: pointer; }
+    .link a { color: blue; text-decoration: underline; }
 
     /* Responsive Design */
     @media (max-width:600px) {
@@ -216,7 +217,7 @@
 
         // Portál Společnosti should always be '?', with a link
         const androidPortalEl = document.getElementById('androidPortal');
-        androidPortalEl.innerHTML = '<a href="https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs" target="_blank">? Stáhněte si Portál společnosti</a>'; // Replace with actual portal URL
+        androidPortalEl.innerHTML = '<a href="https://portal.company.com" target="_blank">?</a>'; // Replace with actual portal URL
 
       }
       // 6.11. Apple (iOS) Detection Logic
@@ -226,7 +227,7 @@
 
         // Portál Společnosti should always be '?', with a link
         const applePortalEl = document.getElementById('applePortal');
-        applePortalEl.innerHTML = '<a href="https://apps.apple.com/cz/app/intune-company-portal/id719171358?l=cs" target="_blank">? Stáhněte si Portál společnosti</a>'; // Replace with actual portal URL
+        applePortalEl.innerHTML = '<a href="https://portal.company.com" target="_blank">?</a>'; // Replace with actual portal URL
 
         // Provide link to Microsoft Edge on App Store
         const edgeLinkApple = document.getElementById('edgeLinkApple');
