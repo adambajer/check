@@ -245,6 +245,19 @@
         const edgeLinkApple = document.getElementById('edgeLinkApple');
         edgeLinkApple.style.display = 'block';
       }
+       else if (osFamily.includes('ios') || osFamily.includes('iphone') || osFamily.includes('ipad') || osFamily.includes('mac os')) {
+    headline.textContent = 'OKbase na zařízení Apple';
+    appleChecks.style.display = 'block';
+
+    // Portál Společnosti: Always show link
+    const applePortalEl = document.getElementById('applePortal');
+    applePortalEl.innerHTML = '<a href="https://apps.apple.com/app/microsoft-company-portal/id719171358" target="_blank">Stáhněte Portál společnosti: App Store</a>';
+
+    // Provide link to Microsoft Edge on App Store
+    const edgeLinkApple = document.getElementById('edgeLinkApple');
+    edgeLinkApple.style.display = 'block';
+}
+
       // 6.12. Windows Detection Logic
       else if (osFamily.includes('windows')) {
         headline.textContent = 'OKbase na zařízení Windows';
