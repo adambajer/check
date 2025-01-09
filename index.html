@@ -75,17 +75,17 @@
     .check-row {
       margin-bottom: 1rem;
       display: flex;
-      flex-direction: column; /* Symboly pod sebou */
-      align-items: flex-end; /* Zarovnání doprava */
+      justify-content: flex-end; /* Zarovnání doprava */
+      align-items: center;
       font-size: 1.1rem;
     }
     .check-row span {
+      margin-left: 1rem;
       display: flex;
       align-items: center;
     }
     .check-row .mark {
       font-weight: bold;
-      margin-left: 0.5rem;
       font-size: 1.2rem;
     }
     .check-row .unknown {
@@ -384,7 +384,7 @@
       }
       
       row.innerHTML = `
-        <span>${text}:</span>
+        <span>${text}</span>
         <span class="mark ${markClass}">${markSymbol}</span>
       `;
       return row;
@@ -394,7 +394,7 @@
       const row = document.createElement('div');
       row.className = 'check-row';
       row.innerHTML = `
-        <span>${text}:</span>
+        <span>${text}</span>
         <span class="mark unknown">?</span>
         <span class="text-muted ms-2">(Nelze zjistit)</span>
       `;
