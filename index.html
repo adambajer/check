@@ -262,55 +262,56 @@
       runDetection();
     });
     
-    function runDetection() {
-      // Hide Spinner and Show Main Content
-      const spinner = document.querySelector('.spinner-container');
-      spinner.style.display = 'none';
-      const mainContent = document.getElementById('mainContent');
-      mainContent.style.display = 'block';
-      
-      // Initialize UAParser
-      const parser = new UAParser();
-      const result = parser.getResult();
-      
-      // Correct Edge Detection for Chromium-based Edge
-      if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
-        result.browser.name = 'Edge';
-        result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
-      }
-      
-      // Extract OS and Browser Information
-      let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
-      const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
-      
-      // Unify macOS and iOS to "iOS"
-      if (osFamily.includes('mac os') || osFamily.includes('ios')) {
-        osFamily = 'ios';
-      }
-      
-      // Set Dynamic Headline and Document Title
-      const headline = document.getElementById('headline');
-      if (osFamily.includes('android')) {
-        headline.textContent = 'OKbase na zařízení Android';
-        document.title = 'OKbase na Android';
-        displayAndroidChecks(result);
-      } else if (osFamily.includes('ios')) {
-        headline.textContent = 'OKbase na zařízení iOS';
-        document.title = 'OKbase na iOS';
-        displayIOSChecks(browserFamily);
-      } else if (osFamily.includes('windows')) {
-        headline.textContent = 'OKbase na zařízení Windows';
-        document.title = 'OKbase na Windows';
-        displayWindowsChecks(browserFamily);
-      } else {
-        headline.textContent = 'Neznámé zařízení';
-        document.title = 'Neznámé zařízení';
-      }
-      
-      // Populate Modal with Structured Data
-      populateModal(result);
-    }
+   
     
+function runDetection() {
+  // Hide Spinner and Show Main Content
+  const spinner = document.querySelector('.spinner-container');
+  spinner.style.display = 'none';
+  const mainContent = document.getElementById('mainContent');
+  mainContent.style.display = 'block';
+  
+  // Initialize UAParser
+  const parser = new UAParser();
+  const result = parser.getResult();
+  
+  // Correct Edge Detection for Chromium-based Edge
+  if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
+    result.browser.name = 'Edge';
+    result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
+  }
+  
+  // Extract OS and Browser Information
+  let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
+  const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
+  
+  // Unify macOS and iOS to "iOS"
+  if (osFamily.includes('mac os') || osFamily.includes('ios')) {
+    osFamily = 'ios';
+  }
+  
+  // Set Dynamic Headline and Document Title
+  const headline = document.getElementById('headline');
+  if (osFamily.includes('android')) {
+    headline.textContent = 'OKbase na zařízení Android';
+    document.title = 'OKbase na Android';
+    displayAndroidChecks(result);
+  } else if (osFamily.includes('ios')) {
+    headline.textContent = 'OKbase na zařízení iOS';
+    document.title = 'OKbase na iOS';
+    displayIOSChecks(result, browserFamily);
+  } else if (osFamily.includes('windows')) {
+    headline.textContent = 'OKbase na zařízení Windows';
+    document.title = 'OKbase na Windows';
+    displayWindowsChecks(result, browserFamily);
+  } else {
+    headline.textContent = 'Neznámé zařízení';
+    document.title = 'Neznámé zařízení';
+  }
+  
+  // Populate Modal with Structured Data
+  populateModal(result);
+}
     /* -----------------------------------------------------------------------
        DISPLAY FUNCTIONS
     ------------------------------------------------------------------------ */
@@ -343,7 +344,7 @@
       // Always show Company Portal download link
       downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.portal', 'Google Play'));
     }
-    function displayIOSChecks(browserFamily) {
+  function displayIOSChecks(result, browserFamily) {
   const requirements = document.getElementById('requirements');
   
   // Extract iOS version
@@ -371,6 +372,7 @@
   // Always show Company Portal download link
   downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
 }
+
     
     function displayWindowsChecks(browserFamily) {
       const requirements = document.getElementById('requirements');
