@@ -430,16 +430,16 @@
     
     function createCheckRow(text, isOK) {
       const row = document.createElement('div');
-      row.className = 'check-row material-symbols-outlined';
+      row.className = 'check-row';
       let markClass = '';
       let markSymbol = '';
       
       if (isOK) {
         markClass = 'ok';
-        markSymbol = 'check';
+        markSymbol = '<span class="material-symbols-outlined">check</span>';
       } else {
         markClass = 'fail';
-        markSymbol = 'close';
+        markSymbol = '<span class="material-symbols-outlined">close</span>';
       }
       
       row.innerHTML = `
@@ -452,9 +452,10 @@
     // V této verzi je otazník s tooltipem, kde se teprve na hover ukáže text "Nelze zjistit"
     function createCheckRowPortal(text) {
       const row = document.createElement('div');
-      row.className = 'check-row material-symbols-outlined';
+      row.className = 'check-row';
       row.innerHTML = `
-        <span class="mark unknown">question_mark
+        <span class="mark unknown">
+        <span class="material-symbols-outlined">question_mark</span>
           <span class="tooltip-text">Nelze zjistit</span>
         </span>
         <span>${text}</span>
