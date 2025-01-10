@@ -19,7 +19,7 @@
   <style>
     /* Miele Branding Colors */
     :root {
-      --miele-red: #E4002B; /* Primární barva */
+      --miele-red: #8C0014; /* Primární barva */
       --miele-black: #000000;
       --miele-white: #FFFFFF;
       --miele-grey: #6c757d; /* Pro texty a popisky */
@@ -27,7 +27,9 @@
       --mark-failure: red;
       --mark-unknown: orange;
     }
-    
+    .mark, mark { 
+        background-color: white;
+    }
     body {
       margin: 0;
       padding: 0;
@@ -87,25 +89,20 @@
       font-size: 1.3rem;
     }
     
-    /* Check Rows Styling */
+    /* Upravený Check Rows Styling */
     .check-row {
+      display: grid;
+      grid-template-columns: 50px 1fr; /* První sloupec pevná šířka, druhý flexibilní */
+      align-items: center;
       margin-bottom: 1rem;
-      display: flex;
-      justify-content: flex-end; /* Zarovnání doprava */
-      align-items: center;
       font-size: 1.1rem;
-    }
-    .check-row span {
-      margin-left: 1rem;
-      display: flex;
-      align-items: center;
     }
     .check-row .mark {
       font-weight: bold;
       font-size: 1.2rem;
+      text-align: center; /* Zarovnání značky na střed v rámci sloupce */
     }
     .check-row .unknown {
-      color: var(--mark-unknown);
       position: relative; /* Pro tooltip */
       cursor: help;
     }
@@ -141,7 +138,7 @@
     .download-link {
       margin-bottom: 1rem;
       font-size: 1.1rem;
-      text-align: right; /* Zarovnání doprava */
+      text-align: left; /* Zarovnání doleva */
     }
     .download-link a {
       color: var(--miele-red);
@@ -211,6 +208,9 @@
       }
       .modal-title {
         font-size: 1.2rem;
+      }
+      .check-row {
+        grid-template-columns: 40px 1fr; /* Menší šířka pro mobil */
       }
     }
   </style>
@@ -435,8 +435,8 @@
       }
       
       row.innerHTML = `
-        <span>${text}</span>
         <span class="mark ${markClass}">${markSymbol}</span>
+        <span>${text}</span>
       `;
       return row;
     }
@@ -446,11 +446,10 @@
       const row = document.createElement('div');
       row.className = 'check-row';
       row.innerHTML = `
-        <span>${text}</span>
-        <span class="mark unknown">
-          ?
+        <span class="mark unknown">?
           <span class="tooltip-text">Nelze zjistit</span>
         </span>
+        <span>${text}</span>
       `;
       return row;
     }
