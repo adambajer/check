@@ -6,7 +6,7 @@
   
   <!-- Dynamický titulek bude nastaven JavaScriptem -->
   <title>OKbase + UAParser.js Demo</title>
-  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <!-- 1. Google Font (Roboto) -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   
@@ -422,16 +422,16 @@
     
     function createCheckRow(text, isOK) {
       const row = document.createElement('div');
-      row.className = 'check-row';
+      row.className = 'check-row material-symbols-outlined';
       let markClass = '';
       let markSymbol = '';
       
       if (isOK) {
         markClass = 'ok';
-        markSymbol = '✔️';
+        markSymbol = 'check';
       } else {
         markClass = 'fail';
-        markSymbol = '❌';
+        markSymbol = 'close';
       }
       
       row.innerHTML = `
@@ -444,9 +444,9 @@
     // V této verzi je otazník s tooltipem, kde se teprve na hover ukáže text "Nelze zjistit"
     function createCheckRowPortal(text) {
       const row = document.createElement('div');
-      row.className = 'check-row';
+      row.className = 'check-row material-symbols-outlined';
       row.innerHTML = `
-        <span class="mark unknown">?
+        <span class="mark unknown">question_mark
           <span class="tooltip-text">Nelze zjistit</span>
         </span>
         <span>${text}</span>
