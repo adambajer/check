@@ -344,34 +344,28 @@ function runDetection() {
       // Always show Company Portal download link
       downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.portal', 'Google Play'));
     }
-  function displayIOSChecks(result, browserFamily) {
-  const requirements = document.getElementById('requirements');
-  
-  // Extract iOS version
-  const iosVersion = result.os.version ? parseInt(result.os.version.split('.')[0], 10) : 0;
-  const iosVersionOK = iosVersion >= 16;
-  
-  // Minimum iOS version 16
-  requirements.appendChild(createCheckRow('Minimální verze iOS 16', iosVersionOK));
-  
-  // Microsoft Edge (Nemůžeme spolehlivě detekovat instalaci na iOS)
-  const edgeInstalled = (browserFamily === 'edge');
-  requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-  
-  // Portál společnosti (Vždy Neznámé)
-  requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-  
-  // Populate Downloads
-  const downloads = document.getElementById('downloads');
-  
-  // If Edge is not installed, show download link
-  if (!edgeInstalled) {
-    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
-  }
-  
-  // Always show Company Portal download link
-  downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
-}
+ 
+    function displayIOSChecks(result, browserFamily) {
+      const requirements = document.getElementById('requirements');
+      
+      const iosVersion = result.os.version ? parseInt(result.os.version.split('.')[0], 10) : 0;
+      const iosVersionOK = iosVersion >= 16;
+      
+      requirements.appendChild(createCheckRow('Minimální verze iOS 16', iosVersionOK));
+      
+      const edgeInstalled = (browserFamily === 'edge');
+      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+      
+      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+      
+      const downloads = document.getElementById('downloads');
+      
+      if (!edgeInstalled) {
+        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
+      }
+      
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
+    }
 
     
     function displayWindowsChecks(browserFamily) {
@@ -448,8 +442,7 @@ function runDetection() {
     /* -----------------------------------------------------------------------
        MODAL POPULATION
     ------------------------------------------------------------------------ */
-    
-    function populateModal(result) {
+     function populateModal(result) {
       const modalContent = document.getElementById('modalContent');
       modalContent.innerHTML = ''; // Clear any existing content
       
