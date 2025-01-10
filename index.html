@@ -259,8 +259,8 @@
   
   <script>
     
-  let parser = '';
-  let result ='';
+  const parser = '';
+  const result ='';
     document.addEventListener('DOMContentLoaded', () => {
       runDetection();
     });
@@ -275,8 +275,8 @@ function runDetection() {
   mainContent.style.display = 'block';
   
   // Initialize UAParser
-    parser = new UAParser();
-    result = parser.getResult();
+  const parser = new UAParser();
+  const result = parser.getResult();
   
   // Correct Edge Detection for Chromium-based Edge
   if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
@@ -442,23 +442,16 @@ function runDetection() {
       return linkDiv;
     }
     
- 
-function populateModal(result) {
-  const modalContent = document.getElementById('modalContent');
-  modalContent.innerHTML = ''; // Clear any existing content
-  
-  // Convert the result object to a formatted JSON string
-  const formattedResult = JSON.stringify(result, null, 2);
-  
-  // Create a pre element to display the formatted JSON
-  const pre = document.createElement('pre');
-  pre.textContent = formattedResult;
-  
-  // Append the pre element to the modal content
-  modalContent.appendChild(pre);
-}
- 
-     
+    /* -----------------------------------------------------------------------
+       MODAL POPULATION
+    ------------------------------------------------------------------------ */
+     function populateModal(result) {
+      const modalContent = document.getElementById('modalContent');
+      modalContent.innerHTML = result; // Clear any existing content
+      
+   
+    }
+    
     function formatObject(obj) {
       if (!obj || Object.keys(obj).length === 0) {
         return 'Neznámé';
