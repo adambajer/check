@@ -258,9 +258,6 @@
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js"></script>
   
   <script>
-    
-  const parser = '';
-  const result ='';
     document.addEventListener('DOMContentLoaded', () => {
       runDetection();
     });
@@ -447,9 +444,31 @@ function runDetection() {
     ------------------------------------------------------------------------ */
      function populateModal(result) {
       const modalContent = document.getElementById('modalContent');
-      modalContent.innerHTML = result; // Clear any existing content
+      modalContent.innerHTML = ''; // Clear any existing content
       
-   
+      const infoCards = [
+        { title: 'UA String', content: result.ua },
+        { title: 'Prohlížeč', content: formatObject(result.browser) },
+        { title: 'Operační Systém', content: formatObject(result.os) },
+        { title: 'Zařízení', content: formatObject(result.device) },
+        { title: 'Engine', content: formatObject(result.engine) },
+        { title: 'CPU', content: formatObject(result.cpu) }
+      ];
+      
+      infoCards.forEach(card => {
+        const section = document.createElement('div');
+        section.className = 'mb-3';
+        
+        const title = document.createElement('h5');
+        title.textContent = card.title;
+        section.appendChild(title);
+        
+        const content = document.createElement('pre');
+        content.textContent = card.content;
+        section.appendChild(content);
+        
+        modalContent.appendChild(section);
+      });
     }
     
     function formatObject(obj) {
