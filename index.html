@@ -334,19 +334,19 @@
       const headline = document.getElementById('headline');
       if (osFamily.includes('android')) {
         headline.textContent = 'OKbase na zařízení Android';
-        document.title = 'OKbase + Android';
+        document.title = 'OKbase na Android';
         displayAndroidChecks(result);
       } else if (osFamily.includes('ios')) {
         headline.textContent = 'OKbase na zařízení iOS';
-        document.title = 'OKbase + iOS';
+        document.title = 'OKbase na iOS';
         displayIOSChecks(browserFamily);
       } else if (osFamily.includes('windows')) {
         headline.textContent = 'OKbase na zařízení Windows';
-        document.title = 'OKbase + Windows';
+        document.title = 'OKbase na Windows';
         displayWindowsChecks(browserFamily);
       } else {
-        headline.textContent = 'X - Neznámé zařízení';
-        document.title = 'X - Neznámé zařízení';
+        headline.textContent = 'Neznámé zařízení';
+        document.title = 'Neznámé zařízení';
       }
       
       // Populate Modal with Structured Data
