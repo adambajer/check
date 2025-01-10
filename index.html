@@ -206,29 +206,22 @@
       text-align:left;
     }
     .logo-container {
+      background-color: var(--miele-black);
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+ 
+      height: 100px;
     }
     .logo-container img {
       width: 160px;
       height: auto;
     }
-    .black-stripe {
-      width: 100%;
-      height: 20px;
-      background-color: var(--miele-black);
-      margin-top: 10px;
-    }
+ 
   </style>
 </head>
 <body>
   <div class="logo-container">
     <img src="logo.png" alt="Miele Logo">
-    <div class="black-stripe"></div>
-  </div>
+   </div>
   <!-- 2) Info Icon in Top-Right Corner -->
   <div id="infoIcon">
     <i class="bi bi-info-circle info-icon" data-bs-toggle="modal" data-bs-target="#infoModal" title="Informace"></i>
