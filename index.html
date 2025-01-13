@@ -282,72 +282,110 @@
       runDetection();
     });
     
-    function runDetection() {
-      // Skrytí Spinneru a zobrazení hlavního obsahu
-      const spinner = document.querySelector('.spinner-container');
-      const mainContent = document.getElementById('mainContent');
-      spinner.style.display = 'none';
-      mainContent.style.display = 'block';
-      
-      // Inicializace UAParser
-      const parser = new UAParser();
-      const result = parser.getResult();
-      
-      // Korekce detekce Edge pro Chromium-based Edge
-      if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
-        result.browser.name = 'Edge';
-        result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
-      }
-      
-      // Extrakce informací o OS a prohlížeči
-      let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
-      const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
-      
-      // Rozlišení mezi macOS a iOS
-      let platform = '';
-      if (osFamily.includes('android')) {
-        platform = 'android';
-      } else if (osFamily.includes('ios')) {
-        platform = 'ios';
-      } else if (osFamily.includes('mac os') || osFamily.includes('macos')) {
-        platform = 'macos';
-      } else if (osFamily.includes('windows')) {
-        platform = 'windows';
-      } else {
-        platform = 'unknown';
-      }
-      
-      // Nastavení dynamického titulku a hlavního nadpisu
-      const headline = document.getElementById('headline');
-      switch(platform) {
-        case 'android':
-          headline.textContent = 'OKbase na Android';
-          document.title = 'OKbase na Android';
-          displayAndroidChecks(result);
-          break;
-        case 'ios':
-          headline.textContent = 'OKbase na iOS';
-          document.title = 'OKbase na iOS';
-          displayIOSChecks(result, browserFamily);
-          break;
-        case 'windows':
-          headline.textContent = 'OKbase na Windows';
-          document.title = 'OKbase na Windows';
-          displayWindowsChecks(browserFamily);
-          break;
-        case 'macos':
-          headline.textContent = 'OKbase na macOS';
-          document.title = 'OKbase na macOS';
-          displayMacOSChecks(result);
-          break;
-        default:
-          headline.textContent = 'Neznámá platforma';
-          document.title = 'Neznámá platforma';
-      }
-      
-      // Naplnění modalu s detailními informacemi
-      populateModal(result);
-    }
+function runDetection() {
+  // Hide Spinner and show Main Content
+  const spinner = document.querySelector('.spinner-container');
+  const mainContent = document.getElementById('mainContent');
+  spinner.style.display = 'none';
+  mainContent.style.display = 'block';
+  
+  // Initialize UAParser
+  const parser = new UAParser();
+  const result = parser.getResult();
+  
+  // Correct Edge Detection
+  if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
+    result.browser.name = 'Edge';
+    result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
+  }
+  
+  // Extract OS and Browser Information
+  let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
+  const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
+  let osVersion = result.os.version ? result.os.version : 'unknown';
+  
+  // Detect Anomaly: Safari on macOS reporting iOS version
+  const isSafari = browserFamily === 'safari';
+  const isMacOS = /mac os|macos/.test(osFamily);
+  
+  if (isSafari && isMacOS && isIOSVersion(osVersion)) {
+    // Correct the OS version by extracting from another part of the UA string
+    osVersion = extractMacOSVersionFromUA(navigator.userAgent);
+    osFamily = 'macos';
+  }
+  
+  // Determine Platform
+  let platform = '';
+  if (osFamily.includes('android')) {
+    platform = 'android';
+  } else if (osFamily.includes('ios')) {
+    platform = 'ios';
+  } else if (osFamily.includes('mac os') || osFamily.includes('macos')) {
+    platform = 'macos';
+  } else if (osFamily.includes('windows')) {
+    platform = 'windows';
+  } else {
+    platform = 'unknown';
+  }
+  
+  // Set Dynamic Title and Headline
+  const headline = document.getElementById('headline');
+  switch(platform) {
+    case 'android':
+      headline.textContent = 'OKbase na Android';
+      document.title = 'OKbase na Android';
+      displayAndroidChecks(result);
+      break;
+    case 'ios':
+      headline.textContent = 'OKbase na iOS';
+      document.title = 'OKbase na iOS';
+      displayIOSChecks(result, browserFamily);
+      break;
+    case 'windows':
+      headline.textContent = 'OKbase na Windows';
+      document.title = 'OKbase na Windows';
+      displayWindowsChecks(browserFamily);
+      break;
+    case 'macos':
+      headline.textContent = 'OKbase na macOS';
+      document.title = 'OKbase na macOS';
+      displayMacOSChecks(result, osVersion);
+      break;
+    default:
+      headline.textContent = 'Neznámá platforma';
+      document.title = 'Neznámá platforma';
+  }
+  
+  // Populate Modal with Detailed Information
+  populateModal(result);
+}
+
+/**
+ * Check if the OS version resembles an iOS version format.
+ * @param {string} version 
+ * @returns {boolean}
+ */
+function isIOSVersion(version) {
+  // iOS versions are typically in the format '14.0', '15.1', etc.
+  return /^\d+\.\d+$/.test(version);
+}
+
+/**
+ * Extract macOS version from the UA string.
+ * This function assumes that macOS versions are present in a specific format within the UA string.
+ * Adjust the regex based on the actual UA string format.
+ * @param {string} ua 
+ * @returns {string}
+ */
+function extractMacOSVersionFromUA(ua) {
+  const macOSRegex = /Mac OS X (\d+[\._]\d+[\._]?\d*)/;
+  const match = ua.match(macOSRegex);
+  if (match && match[1]) {
+    return match[1].replace(/_/g, '.'); // Replace underscores with dots if necessary
+  }
+  return 'unknown';
+}
+
     
     /* -----------------------------------------------------------------------
        DISPLAY FUNCTIONS
@@ -419,31 +457,33 @@
       downloads.appendChild(createDownloadLink('Portál společnosti', 'https://www.microsoft.com/p/company-portal/9wzdncrfj3pz?rtc=2&activetab=pivot:overviewtab', 'Oficiální stránka'));
     }
     
-    // **Přidána nová funkce pro macOS**
-    function displayMacOSChecks(result) {
-      const requirements = document.getElementById('requirements');
-      const downloads = document.getElementById('downloads');
-      
-      // Minimální verze macOS 10.15 (Catalina)
-      const macOSVersionOK = result.os.version && parseFloat(result.os.version) >= 10.15;
-      requirements.appendChild(createCheckRow('Minimální verze macOS 10.15 (Catalina)', macOSVersionOK));
-      
-      // Volné místo 200 MB (Simulováno jako vždy OK)
-      requirements.appendChild(createCheckRow('Volné místo 200 MB', true));
-      
-      // Microsoft Edge
-      const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
-      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-      
-      // Portál společnosti (Vždy Neznámé)
-      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-      
-      // Naplnění sekce Ke stažení
-      if (!edgeInstalled) {
-        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
-      }
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.microsoft.com/detail/9wzdncrfj3pz?amp%3Bgl=cz&hl=cs-CZ&gl=CZ', 'Oficiální stránka'));
-    }
+   function displayMacOSChecks(result, osVersion) {
+  const requirements = document.getElementById('requirements');
+  const downloads = document.getElementById('downloads');
+  
+  // Convert OS Version to Float for Comparison
+  const numericVersion = parseFloat(osVersion);
+  const macOSVersionOK = !isNaN(numericVersion) && numericVersion >= 10.15;
+  
+  requirements.appendChild(createCheckRow('Minimální verze macOS 10.15 (Catalina)', macOSVersionOK));
+  
+  // Free Space 200 MB (Simulated as always OK)
+  requirements.appendChild(createCheckRow('Volné místo 200 MB', true));
+  
+  // Microsoft Edge
+  const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
+  requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+  
+  // Company Portal (Always Unknown)
+  requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+  
+  // Populate Downloads Section
+  if (!edgeInstalled) {
+    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
+  }
+  downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.microsoft.com/detail/9wzdncrfj3pz?amp%3Bgl=cz&hl=cs-CZ&gl=CZ', 'Oficiální stránka'));
+}
+
     
     /* -----------------------------------------------------------------------
        HELPER FUNCTIONS
