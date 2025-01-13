@@ -278,302 +278,344 @@
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1.0.2/dist/ua-parser.min.js"></script>
   
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      runDetection();
+  document.addEventListener('DOMContentLoaded', () => {
+    runDetection();
+  });
+  
+  function runDetection() {
+    // Skrytí Spinneru a zobrazení hlavního obsahu
+    const spinner = document.querySelector('.spinner-container');
+    const mainContent = document.getElementById('mainContent');
+    spinner.style.display = 'none';
+    mainContent.style.display = 'block';
+    
+    // Inicializace UAParser
+    const parser = new UAParser();
+    const result = parser.getResult();
+    
+    // Korekce detekce Edge pro Chromium-based Edge
+    if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
+      result.browser.name = 'Edge';
+      result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
+    }
+    
+    // Extrakce informací o OS a prohlížeči
+    let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
+    const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
+    let osVersion = result.os.version ? result.os.version : 'unknown';
+    
+    // Primární detekce platformy
+    let platform = determinePlatform(osFamily);
+    
+    // Detekce anomálie: Safari na macOS, který hlásí iOS verzi
+    if (isSafari(browserFamily) && (platform === 'macos' || platform === 'ios') && isVersionFormatIOS(osVersion)) {
+      // Sekundární kontrola pomocí navigator.platform a dalších vlastností
+      const secondaryPlatform = secondaryOSDetection();
+      if (secondaryPlatform !== 'unknown') {
+        platform = secondaryPlatform;
+        // Aktualizace osFamily a osVersion podle sekundární detekce
+        osFamily = platform;
+        if (platform === 'macos') {
+          osVersion = extractMacOSVersionFromUA(navigator.userAgent);
+        } else if (platform === 'ios') {
+          // Pokud je to iOS, zachovejte původní osVersion
+        }
+      }
+    }
+    
+    // Nastavení dynamického titulku a hlavního nadpisu
+    const headline = document.getElementById('headline');
+    switch(platform) {
+      case 'android':
+        headline.textContent = 'OKbase na Android';
+        document.title = 'OKbase na Android';
+        displayAndroidChecks(result);
+        break;
+      case 'ios':
+        headline.textContent = 'OKbase na iOS';
+        document.title = 'OKbase na iOS';
+        displayIOSChecks(result, browserFamily);
+        break;
+      case 'windows':
+        headline.textContent = 'OKbase na Windows';
+        document.title = 'OKbase na Windows';
+        displayWindowsChecks(browserFamily);
+        break;
+      case 'macos':
+        headline.textContent = 'OKbase na macOS';
+        document.title = 'OKbase na macOS';
+        displayMacOSChecks(result, osVersion);
+        break;
+      default:
+        headline.textContent = 'Neznámá platforma';
+        document.title = 'Neznámá platforma';
+    }
+    
+    // Naplnění modalu s detailními informacemi
+    populateModal(result);
+  }
+  
+  /**
+   * Primární detekce platformy na základě osFamily.
+   * @param {string} osFamily 
+   * @returns {string}
+   */
+  function determinePlatform(osFamily) {
+    if (osFamily.includes('android')) {
+      return 'android';
+    } else if (osFamily.includes('ios')) {
+      return 'ios';
+    } else if (osFamily.includes('mac os') || osFamily.includes('macos')) {
+      return 'macos';
+    } else if (osFamily.includes('windows')) {
+      return 'windows';
+    } else {
+      return 'unknown';
+    }
+  }
+  
+  /**
+   * Kontrola, zda je prohlížeč Safari.
+   * @param {string} browserFamily 
+   * @returns {boolean}
+   */
+  function isSafari(browserFamily) {
+    return browserFamily === 'safari';
+  }
+  
+  /**
+   * Kontrola, zda formát verze odpovídá iOS (např. '14.0').
+   * @param {string} version 
+   * @returns {boolean}
+   */
+  function isVersionFormatIOS(version) {
+    return /^\d+\.\d+$/.test(version);
+  }
+  
+  /**
+   * Sekundární detekce operačního systému pomocí navigator.platform a dalších vlastností.
+   * @returns {string} 'macos', 'ios', nebo 'unknown'
+   */
+  function secondaryOSDetection() {
+    const platform = navigator.platform.toLowerCase();
+    const maxTouchPoints = navigator.maxTouchPoints || 0;
+    
+    // Kontrola platformy
+    if (platform.includes('mac')) {
+      // Další kontrola na dotykové body - macOS obvykle nemá dotykové obrazovky
+      if (maxTouchPoints > 0) {
+        // Pravděpodobně iPad s iOS
+        return 'ios';
+      }
+      return 'macos';
+    } else if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
+      return 'ios';
+    }
+    
+    return 'unknown';
+  }
+  
+  /**
+   * Extrakce verze macOS z UA stringu.
+   * @param {string} ua 
+   * @returns {string}
+   */
+  function extractMacOSVersionFromUA(ua) {
+    const macOSRegex = /Mac OS X (\d+[\._]\d+[\._]?\d*)/;
+    const match = ua.match(macOSRegex);
+    if (match && match[1]) {
+      return match[1].replace(/_/g, '.'); // Nahrazení podtržítek tečkami
+    }
+    return 'unknown';
+  }
+  
+  /* -----------------------------------------------------------------------
+     DISPLAY FUNCTIONS
+  ------------------------------------------------------------------------ */
+  
+  function displayAndroidChecks(result) {
+    const requirements = document.getElementById('requirements');
+    const downloads = document.getElementById('downloads');
+    
+    // Minimální verze Android 10
+    const androidVersionOK = result.os.version && parseInt(result.os.version, 10) >= 10;
+    requirements.appendChild(createCheckRow('Minimální verze Android 10', androidVersionOK));
+    
+    // Volné místo 140 MB (Simulováno jako vždy OK)
+    requirements.appendChild(createCheckRow('Volné místo 140 MB', true));
+    
+    // Microsoft Edge
+    const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
+    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    
+    // Portál společnosti (Vždy Neznámé)
+    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+    
+    // Naplnění sekce Ke stažení
+    if (!edgeInstalled) {
+      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
+    }
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
+  }
+
+  function displayIOSChecks(result, browserFamily) {
+    const requirements = document.getElementById('requirements');
+    const downloads = document.getElementById('downloads');
+    
+    // Minimální verze iOS 16
+    const iosVersion = result.os.version ? parseInt(result.os.version.split('.')[0], 10) : 0;
+    const iosVersionOK = iosVersion >= 16;
+    requirements.appendChild(createCheckRow('Minimální verze iOS 16', iosVersionOK));
+    
+    // Microsoft Edge
+    const edgeInstalled = (browserFamily === 'edge');
+    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    
+    // Portál společnosti (Vždy Neznámé)
+    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+    
+    // Naplnění sekce Ke stažení
+    if (!edgeInstalled) {
+      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
+    }
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
+  }
+
+  function displayWindowsChecks(browserFamily) {
+    const requirements = document.getElementById('requirements');
+    const downloads = document.getElementById('downloads');
+    
+    // Microsoft Edge
+    const edgeInstalled = (browserFamily === 'edge');
+    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    
+    // Portál společnosti (Vždy Neznámé)
+    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+    
+    // Naplnění sekce Ke stažení
+    if (!edgeInstalled) {
+      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
+    }
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://www.microsoft.com/p/company-portal/9wzdncrfj3pz?rtc=2&activetab=pivot:overviewtab', 'Oficiální stránka'));
+  }
+  
+  // **Přidána nová funkce pro macOS**
+  function displayMacOSChecks(result, osVersion) {
+    const requirements = document.getElementById('requirements');
+    const downloads = document.getElementById('downloads');
+    
+    // Převod verze OS na číslo pro porovnání
+    const numericVersion = parseFloat(osVersion);
+    const macOSVersionOK = !isNaN(numericVersion) && numericVersion >= 10.15;
+    
+    requirements.appendChild(createCheckRow('Minimální verze macOS 10.15 (Catalina)', macOSVersionOK));
+    
+    // Volné místo 200 MB (Simulováno jako vždy OK)
+    requirements.appendChild(createCheckRow('Volné místo 200 MB', true));
+    
+    // Microsoft Edge
+    const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
+    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    
+    // Portál společnosti (Vždy Neznámé)
+    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+    
+    // Naplnění sekce Ke stažení
+    if (!edgeInstalled) {
+      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
+    }
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.microsoft.com/detail/9wzdncrfj3pz?amp%3Bgl=cz&hl=cs-CZ&gl=CZ', 'Oficiální stránka'));
+  }
+  
+  /* -----------------------------------------------------------------------
+     HELPER FUNCTIONS
+  ------------------------------------------------------------------------ */
+  
+  function createCheckRow(text, isOK) {
+    const row = document.createElement('div');
+    row.className = 'check-row';
+    let markClass = '';
+    let markSymbol = '';
+    
+    if (isOK) {
+      markClass = 'ok';
+      markSymbol = 'check';
+    } else {
+      markClass = 'fail';
+      markSymbol = 'close';
+    }
+    
+    row.innerHTML = `
+      <span class="mark ${markClass}">
+        <span class="material-symbols-outlined">${markSymbol}</span>
+      </span>
+      <span>${text}</span>
+    `;
+    return row;
+  }
+  
+  // V této verzi je otazník s tooltipem, kde se teprve na hover ukáže text "Nelze zjistit"
+  function createCheckRowPortal(text) {
+    const row = document.createElement('div');
+    row.className = 'check-row';
+    row.innerHTML = `
+      <span class="mark unknown">
+        <span class="material-symbols-outlined">question_mark</span>
+        <span class="tooltip-text">Nelze zjistit</span>
+      </span>
+      <span>${text}</span>
+    `;
+    return row;
+  }
+  
+  function createDownloadLink(appName, url, storeName) {
+    const linkDiv = document.createElement('div');
+    linkDiv.className = 'download-link';
+    linkDiv.innerHTML = `
+      <span></span>
+      <a href="${url}" target="_blank" title="Stáhněte ${appName} z ${storeName}">${appName}</a>
+    `;
+    return linkDiv;
+  }
+  
+  /* -----------------------------------------------------------------------
+     MODAL POPULATION
+  ------------------------------------------------------------------------ */
+  function populateModal(result) {
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = ''; // Vyčištění existujícího obsahu
+ 
+    const infoCards = [
+      { title: 'UA String', content: result.ua },
+      { title: 'Prohlížeč', content: formatObject(result.browser) },
+      { title: 'Operační Systém', content: formatObject(result.os) },
+      { title: 'Zařízení', content: formatObject(result.device) },
+      { title: 'Engine', content: formatObject(result.engine) },
+      { title: 'CPU', content: formatObject(result.cpu) }
+    ];
+    
+    infoCards.forEach(card => {
+      const section = document.createElement('div');
+      section.className = 'mb-3';
+      
+      const title = document.createElement('h5');
+      title.textContent = card.title;
+      section.appendChild(title);
+      
+      const content = document.createElement('pre');
+      content.textContent = card.content;
+      section.appendChild(content);
+      
+      modalContent.appendChild(section);
     });
-    
-function runDetection() {
-  // Hide Spinner and show Main Content
-  const spinner = document.querySelector('.spinner-container');
-  const mainContent = document.getElementById('mainContent');
-  spinner.style.display = 'none';
-  mainContent.style.display = 'block';
+   }
   
-  // Initialize UAParser
-  const parser = new UAParser();
-  const result = parser.getResult();
-  
-  // Correct Edge Detection
-  if (result.browser.name === 'Chrome' && /Edg\/\d+/.test(navigator.userAgent)) {
-    result.browser.name = 'Edge';
-    result.browser.version = navigator.userAgent.match(/Edg\/(\d+)/)[1];
+  function formatObject(obj) {
+    if (!obj || Object.keys(obj).length === 0) {
+      return 'Neznámé';
+    }
+    return JSON.stringify(obj, null, 2);
   }
-  
-  // Extract OS and Browser Information
-  let osFamily = result.os.name ? result.os.name.toLowerCase() : 'unknown';
-  const browserFamily = result.browser.name ? result.browser.name.toLowerCase() : 'unknown';
-  let osVersion = result.os.version ? result.os.version : 'unknown';
-  
-  // Detect Anomaly: Safari on macOS reporting iOS version
-  const isSafari = browserFamily === 'safari';
-  const isMacOS = /mac os|macos/.test(osFamily);
-  
-  if (isSafari && isMacOS && isIOSVersion(osVersion)) {
-    // Correct the OS version by extracting from another part of the UA string
-    osVersion = extractMacOSVersionFromUA(navigator.userAgent);
-    osFamily = 'macos';
-  }
-  
-  // Determine Platform
-  let platform = '';
-  if (osFamily.includes('android')) {
-    platform = 'android';
-  } else if (osFamily.includes('ios')) {
-    platform = 'ios';
-  } else if (osFamily.includes('mac os') || osFamily.includes('macos')) {
-    platform = 'macos';
-  } else if (osFamily.includes('windows')) {
-    platform = 'windows';
-  } else {
-    platform = 'unknown';
-  }
-  
-  // Set Dynamic Title and Headline
-  const headline = document.getElementById('headline');
-  switch(platform) {
-    case 'android':
-      headline.textContent = 'OKbase na Android';
-      document.title = 'OKbase na Android';
-      displayAndroidChecks(result);
-      break;
-    case 'ios':
-      headline.textContent = 'OKbase na iOS';
-      document.title = 'OKbase na iOS';
-      displayIOSChecks(result, browserFamily);
-      break;
-    case 'windows':
-      headline.textContent = 'OKbase na Windows';
-      document.title = 'OKbase na Windows';
-      displayWindowsChecks(browserFamily);
-      break;
-    case 'macos':
-      headline.textContent = 'OKbase na macOS';
-      document.title = 'OKbase na macOS';
-      displayMacOSChecks(result, osVersion);
-      break;
-    default:
-      headline.textContent = 'Neznámá platforma';
-      document.title = 'Neznámá platforma';
-  }
-  
-  // Populate Modal with Detailed Information
-  populateModal(result);
-}
-
-/**
- * Check if the OS version resembles an iOS version format.
- * @param {string} version 
- * @returns {boolean}
- */
-function isIOSVersion(version) {
-  // iOS versions are typically in the format '14.0', '15.1', etc.
-  return /^\d+\.\d+$/.test(version);
-}
-
-/**
- * Extract macOS version from the UA string.
- * This function assumes that macOS versions are present in a specific format within the UA string.
- * Adjust the regex based on the actual UA string format.
- * @param {string} ua 
- * @returns {string}
- */
-function extractMacOSVersionFromUA(ua) {
-  const macOSRegex = /Mac OS X (\d+[\._]\d+[\._]?\d*)/;
-  const match = ua.match(macOSRegex);
-  if (match && match[1]) {
-    return match[1].replace(/_/g, '.'); // Replace underscores with dots if necessary
-  }
-  return 'unknown';
-}
-
-    
-    /* -----------------------------------------------------------------------
-       DISPLAY FUNCTIONS
-    ------------------------------------------------------------------------ */
-    
-    function displayAndroidChecks(result) {
-      const requirements = document.getElementById('requirements');
-      const downloads = document.getElementById('downloads');
-      
-      // Minimální verze Android 10
-      const androidVersionOK = result.os.version && parseInt(result.os.version, 10) >= 10;
-      requirements.appendChild(createCheckRow('Minimální verze Android 10', androidVersionOK));
-      
-      // Volné místo 140 MB (Simulováno jako vždy OK)
-      requirements.appendChild(createCheckRow('Volné místo 140 MB', true));
-      
-      // Microsoft Edge
-      const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
-      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-      
-      // Portál společnosti (Vždy Neznámé)
-      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-      
-      // Naplnění sekce Ke stažení
-      if (!edgeInstalled) {
-        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
-      }
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
-    }
-
-    function displayIOSChecks(result, browserFamily) {
-      const requirements = document.getElementById('requirements');
-      const downloads = document.getElementById('downloads');
-      
-      // Minimální verze iOS 16
-      const iosVersion = result.os.version ? parseInt(result.os.version.split('.')[0], 10) : 0;
-      const iosVersionOK = iosVersion >= 16;
-      requirements.appendChild(createCheckRow('Minimální verze iOS 16', iosVersionOK));
-      
-      // Microsoft Edge
-      const edgeInstalled = (browserFamily === 'edge');
-      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-      
-      // Portál společnosti (Vždy Neznámé)
-      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-      
-      // Naplnění sekce Ke stažení
-      if (!edgeInstalled) {
-        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
-      }
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
-    }
-
-    function displayWindowsChecks(browserFamily) {
-      const requirements = document.getElementById('requirements');
-      const downloads = document.getElementById('downloads');
-      
-      // Microsoft Edge
-      const edgeInstalled = (browserFamily === 'edge');
-      requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-      
-      // Portál společnosti (Vždy Neznámé)
-      requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-      
-      // Naplnění sekce Ke stažení
-      if (!edgeInstalled) {
-        downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
-      }
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://www.microsoft.com/p/company-portal/9wzdncrfj3pz?rtc=2&activetab=pivot:overviewtab', 'Oficiální stránka'));
-    }
-    
-   function displayMacOSChecks(result, osVersion) {
-  const requirements = document.getElementById('requirements');
-  const downloads = document.getElementById('downloads');
-  
-  // Convert OS Version to Float for Comparison
-  const numericVersion = parseFloat(osVersion);
-  const macOSVersionOK = !isNaN(numericVersion) && numericVersion >= 10.15;
-  
-  requirements.appendChild(createCheckRow('Minimální verze macOS 10.15 (Catalina)', macOSVersionOK));
-  
-  // Free Space 200 MB (Simulated as always OK)
-  requirements.appendChild(createCheckRow('Volné místo 200 MB', true));
-  
-  // Microsoft Edge
-  const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
-  requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-  
-  // Company Portal (Always Unknown)
-  requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-  
-  // Populate Downloads Section
-  if (!edgeInstalled) {
-    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
-  }
-  downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.microsoft.com/detail/9wzdncrfj3pz?amp%3Bgl=cz&hl=cs-CZ&gl=CZ', 'Oficiální stránka'));
-}
-
-    
-    /* -----------------------------------------------------------------------
-       HELPER FUNCTIONS
-    ------------------------------------------------------------------------ */
-    
-    function createCheckRow(text, isOK) {
-      const row = document.createElement('div');
-      row.className = 'check-row';
-      let markClass = '';
-      let markSymbol = '';
-      
-      if (isOK) {
-        markClass = 'ok';
-        markSymbol = 'check';
-      } else {
-        markClass = 'fail';
-        markSymbol = 'close';
-      }
-      
-      row.innerHTML = `
-        <span class="mark ${markClass}">
-          <span class="material-symbols-outlined">${markSymbol}</span>
-        </span>
-        <span>${text}</span>
-      `;
-      return row;
-    }
-    
-    // V této verzi je otazník s tooltipem, kde se teprve na hover ukáže text "Nelze zjistit"
-    function createCheckRowPortal(text) {
-      const row = document.createElement('div');
-      row.className = 'check-row';
-      row.innerHTML = `
-        <span class="mark unknown">
-          <span class="material-symbols-outlined">question_mark</span>
-          <span class="tooltip-text">Nelze zjistit</span>
-        </span>
-        <span>${text}</span>
-      `;
-      return row;
-    }
-    
-    function createDownloadLink(appName, url, storeName) {
-      const linkDiv = document.createElement('div');
-      linkDiv.className = 'download-link';
-      linkDiv.innerHTML = `
-        <span></span>
-        <a href="${url}" target="_blank" title="Stáhněte ${appName} z ${storeName}">${appName}</a>
-      `;
-      return linkDiv;
-    }
-    
-    /* -----------------------------------------------------------------------
-       MODAL POPULATION
-    ------------------------------------------------------------------------ */
-    function populateModal(result) {
-      const modalContent = document.getElementById('modalContent');
-      modalContent.innerHTML = ''; // Vyčištění existujícího obsahu
-   
-      const infoCards = [
-        { title: 'UA String', content: result.ua },
-        { title: 'Prohlížeč', content: formatObject(result.browser) },
-        { title: 'Operační Systém', content: formatObject(result.os) },
-        { title: 'Zařízení', content: formatObject(result.device) },
-        { title: 'Engine', content: formatObject(result.engine) },
-        { title: 'CPU', content: formatObject(result.cpu) }
-      ];
-      
-      infoCards.forEach(card => {
-        const section = document.createElement('div');
-        section.className = 'mb-3';
-        
-        const title = document.createElement('h5');
-        title.textContent = card.title;
-        section.appendChild(title);
-        
-        const content = document.createElement('pre');
-        content.textContent = card.content;
-        section.appendChild(content);
-        
-        modalContent.appendChild(section);
-      });
-     }
-    
-    function formatObject(obj) {
-      if (!obj || Object.keys(obj).length === 0) {
-        return 'Neznámé';
-      }
-      return JSON.stringify(obj, null, 2);
-    }
   </script>
 </body>
 </html>
