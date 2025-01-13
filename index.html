@@ -276,8 +276,7 @@
   
   <!-- UAParser.js -->
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1.0.2/dist/ua-parser.min.js"></script>
-  
-<script>
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
     runDetection();
   });
@@ -308,7 +307,7 @@
     // Primární detekce platformy
     let platform = determinePlatform(osFamily);
 
-    // Detekce anomálie: Safari na macOS, který hlásí iOS verzi a zařízení není specifikováno
+    // Detekce anomálie: Safari na iOS, který hlásí verzi iOS jako verzi prohlížeče
     if (platform === 'macos' && isSafari(browserFamily) && isVersionFormatIOS(result.browser.version) && deviceFamily === 'unknown') {
       // Přepnutí platformy na iOS
       platform = 'ios';
@@ -587,6 +586,7 @@
     return JSON.stringify(obj, null, 2);
   }
 </script>
+
 
 </body>
 </html>
