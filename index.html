@@ -238,7 +238,7 @@
     <h1 id="headline" class="mb-4"></h1>
     
     <!-- Kontrola požadavků -->
-    <h2>Kontrola požadavků</h2>
+    <h2 id="requirementshead">Kontrola požadavků</h2>
     <div id="requirements" class="mb-4">
       <!-- Dynamické Check Rows budou Zde -->
     </div>
@@ -285,6 +285,7 @@
     runDetection();
   });
   let downloadshead;
+  let requirementshead;
   function runDetection() {
     // Skrytí spinneru a zobrazení hlavního obsahu
     const spinner = document.querySelector('.spinner-container');
@@ -292,7 +293,7 @@
     spinner.style.display = 'none';
     mainContent.style.display = 'block';
    downloadshead = document.getElementById('downloadshead');
-
+   requirementshead =  document.getElementById('requirementshead');
     // Inicializace UAParser
     const parser = new UAParser();
     const result = parser.getResult();
@@ -346,6 +347,9 @@
       default:
         headline.textContent = 'Neznámá platforma';
         document.title = 'Neznámá platforma';
+        downloadshead.style = "display: none;";
+        requirementshead.style = "display: none;";
+
     }
 
     // Naplnění modalu s detailními informacemi
