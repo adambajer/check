@@ -212,21 +212,20 @@
     .btn-share {
       margin-top: 2rem;
       display: flex;
-      justify-content: center;
-      gap: 1rem;
+       gap: 1rem;
     }
 
     .btn-share a {
       text-decoration: none;
       color: white;
       padding: 10px 20px;
-      background-color: #007bff;
+      background-color: var(--miele-red);
       border-radius: 5px;
       font-size: 1rem;
     }
 
     .btn-share a:hover {
-      background-color: #0056b3;
+      background-color: var(--miele-red);
     }
   </style>
 </head>
@@ -254,42 +253,40 @@
   
   <!-- Main Content -->
   <div class="container my-4" id="mainContent" style="display: none;">
-    <h1 id="headline" class="mb-4"></h1>
+    <h1 id="headline" class="mb-2"></h1>
     
     <!-- Kontrola požadavků -->
     <h2 id="requirementshead">Kontrola požadavků</h2>
-    <div id="requirements" class="mb-4">
+    <div id="requirements" class="mb-2">
       <!-- Dynamické Check Rows budou Zde -->
     </div>
     
     <!-- Ke stažení -->
     <h2 id="downloadshead">Ke stažení</h2>
-    <div id="downloads" class="mb-4">
+    <div id="downloads" class="mb-2">
       <!-- Dynamické Download Links budou Zde -->
     </div>
     
     <!-- Link to OKbase -->
-     <div>
-      <a href="https://okbase2.miele.com" class="btn btn-primary" target="_blank" title="https://okbase2.miele.com/">Přejít na OKbase</a>
+     <div class="btn-share">
+      <a href="https://okbase2.miele.com"   target="_blank" title="https://okbase2.miele.com/" >Přejít na OKbase https://okbase2.miele.com/</a>
       
     </div>
-    <div class="pt-2">https://okbase2.miele.com/</div>
-    <div class="pt-2">Pro přihlášení používáte login ve tvaru CZXXXX, který Vám byl sdělen</div>
-        <!-- Share Links -->
+         <!-- Share Links -->
         <div class="btn-share">
           <!-- Share via Email -->
-          <a href="mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: https://okbase2.miele.com/" target="_blank">
+          <a href="mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: https://okbase2.miele.com/" target="_blank" >
             <i class="bi bi-envelope"></i> Sdílet e-mailem
           </a>
     
           <!-- Share via WhatsApp -->
           <a href="https://wa.me/?text=Podívejte se na OKbase: https://okbase2.miele.com/" target="_blank">
-            <i class="bi bi-whatsapp"></i> Sdílet na WhatsApp
+            <i class="bi bi-whatsapp"></i> Sdílej přes WhatsApp
           </a>
     
           <!-- Share via Facebook Messenger -->
           <a href="https://www.facebook.com/dialog/send?link=https://okbase2.miele.com/&app_id=122948579198" target="_blank">
-            <i class="bi bi-facebook"></i> Sdílet na Facebook Messenger
+            <i class="bi bi-facebook"></i> Sdílet přes Facebook Messenger
           </a>
         </div>
     
