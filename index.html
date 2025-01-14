@@ -244,14 +244,13 @@
     </div>
     
     <!-- Ke stažení -->
-    <h2>Ke stažení</h2>
+    <h2 id="downloadshead">Ke stažení</h2>
     <div id="downloads" class="mb-4">
       <!-- Dynamické Download Links budou Zde -->
     </div>
     
     <!-- Link to OKbase -->
-    <hr>
-    <div>
+     <div>
       <a href="https://okbase2.miele.com" class="btn btn-primary" target="_blank" title="https://okbase2.miele.com/">Přejít na OKbase</a>
       
     </div>
@@ -462,19 +461,22 @@
   function displayWindowsChecks(browserFamily) {
     const requirements = document.getElementById('requirements');
     const downloads = document.getElementById('downloads');
+    const downloadshead = document.getElementById('downloadshead');
 
     // Microsoft Edge
     const edgeInstalled = (browserFamily === 'edge');
     requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
 
     // Portál společnosti (Vždy Neznámé)
-    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
+    //requirements.appendChild(createCheckRowPortal('Portál společnosti'));
 
     // Naplnění sekce Ke stažení
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
     }
-    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://www.microsoft.com/p/company-portal/9wzdncrfj3pz?rtc=2&activetab=pivot:overviewtab', 'Oficiální stránka'));
+    else {}
+    
+    downloadshead.style = "display: none;";
   }
 
   // **Přidána nová funkce pro macOS**
