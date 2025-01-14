@@ -267,29 +267,29 @@
       <!-- Dynamické Download Links budou Zde -->
     </div>
     
-    <!-- Link to OKbase -->
-     <div class="btn-share">
-      <a href="https://okbase2.miele.com"   target="_blank" title="https://okbase2.miele.com/" >Přejít na OKbase https://okbase2.miele.com/</a>
-      
-    </div>
-         <!-- Share Links -->
-        <div class="btn-share">
-          <!-- Share via Email -->
-          <a href="mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: https://okbase2.miele.com/" target="_blank" >
-            <i class="bi bi-envelope"></i> Sdílet e-mailem
-          </a>
-    
-          <!-- Share via WhatsApp -->
-          <a href="https://wa.me/?text=Podívejte se na OKbase: https://okbase2.miele.com/" target="_blank">
-            <i class="bi bi-whatsapp"></i> Sdílej přes WhatsApp
-          </a>
-    
-          <!-- Share via Facebook Messenger -->
-          <a href="https://www.facebook.com/dialog/send?link=https://okbase2.miele.com/&app_id=122948579198" target="_blank">
-            <i class="bi bi-facebook"></i> Sdílet přes Facebook Messenger
-          </a>
-        </div>
-    
+   <!-- Share Links -->
+   <div class="btn-share">
+    <!-- Share via Email -->
+    <a href="mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: " id="shareEmail">
+      <i class="bi bi-envelope"></i> Sdílet e-mailem
+    </a>
+
+    <!-- Share via WhatsApp -->
+    <a href="https://wa.me/?text=" id="shareWhatsApp">
+      <i class="bi bi-whatsapp"></i> Sdílet na WhatsApp
+    </a>
+
+    <!-- Share via Facebook Messenger -->
+    <a href="#" id="shareMessenger">
+      <i class="bi bi-facebook"></i> Sdílet na Facebook Messenger
+    </a>
+
+    <!-- Share via SMS -->
+    <a href="sms:?body=" id="shareSMS">
+      <i class="bi bi-chat-left-text"></i> Sdílet přes SMS
+    </a>
+  </div>
+     
   </div>
   
   <!-- Modal for Detailed Information -->
@@ -317,6 +317,34 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     runDetection();
+      // Get current URL
+      const currentUrl = window.location.href;
+
+      // Get platform from user agent
+      const userAgent = navigator.userAgent.toLowerCase();
+      let platform = 'unknown';
+
+      if (userAgent.includes('android')) {
+        platform = 'android';
+      } else if (userAgent.includes('ios')) {
+        platform = 'ios';
+      } else if (userAgent.includes('windows')) {
+        platform = 'windows';
+      } else if (userAgent.includes('macos')) {
+        platform = 'macos';
+      }
+
+      // Update share links with the current URL
+      document.getElementById('shareEmail').setAttribute('href', `mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: ${currentUrl}`);
+      document.getElementById('shareWhatsApp').setAttribute('href', `https://wa.me/?text=Podívejte se na OKbase: ${currentUrl}`);
+      document.getElementById('shareSMS').setAttribute('href', `sms:?body=Podívejte se na OKbase: ${currentUrl}`);
+
+      // Adjust Facebook Messenger link based on platform
+      const messengerLink = platform === 'windows' || platform === 'macos'
+        ? `https://www.messenger.com/t/`
+        : `fb-messenger://share?link=`;
+
+      document.getElementById('shareMessenger').setAttribute('href', `${messengerLink}${currentUrl}`);
   });
   let downloadshead;
   let requirementshead;
