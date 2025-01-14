@@ -284,13 +284,14 @@
   document.addEventListener('DOMContentLoaded', () => {
     runDetection();
   });
-
+  let downloadshead;
   function runDetection() {
     // Skrytí spinneru a zobrazení hlavního obsahu
     const spinner = document.querySelector('.spinner-container');
     const mainContent = document.getElementById('mainContent');
     spinner.style.display = 'none';
     mainContent.style.display = 'block';
+   downloadshead = document.getElementById('downloadshead');
 
     // Inicializace UAParser
     const parser = new UAParser();
@@ -427,13 +428,19 @@
     // Naplnění sekce Ke stažení
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
+
     }
-    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
+    else {
+    
+      downloadshead.style = "display: none;";
+    }
+    
   }
   function displayIOSChecks(result, browserFamily, osVersion) {
     const requirements = document.getElementById('requirements');
     const downloads = document.getElementById('downloads');
-  
+ 
     // Check if osVersion is empty and use the browser version if it's Safari
     let iosVersion = 0;
     if (osVersion) {
@@ -455,13 +462,16 @@
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
     }
+    else {
+    
+      downloadshead.style = "display: none;";
+    }
   }
   
 
   function displayWindowsChecks(browserFamily) {
     const requirements = document.getElementById('requirements');
     const downloads = document.getElementById('downloads');
-    const downloadshead = document.getElementById('downloadshead');
 
     // Microsoft Edge
     const edgeInstalled = (browserFamily === 'edge');
@@ -474,9 +484,11 @@
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
     }
-    else {}
+    else {
     
-    downloadshead.style = "display: none;";
+      downloadshead.style = "display: none;";
+    }
+    
   }
 
   // **Přidána nová funkce pro macOS**
