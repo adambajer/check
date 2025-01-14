@@ -182,7 +182,7 @@
     
     /* Info Icon Position */
     #infoIcon {
-      position: fixed;
+      position: absolute;
       top: 1rem;
       right: 1rem;
       z-index: 1050;
@@ -209,6 +209,25 @@
     .mark, mark {
        background: white;
     } 
+    .btn-share {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-share a {
+      text-decoration: none;
+      color: white;
+      padding: 10px 20px;
+      background-color: #007bff;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .btn-share a:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -256,6 +275,24 @@
     </div>
     <div class="pt-2">https://okbase2.miele.com/</div>
     <div class="pt-2">Pro přihlášení používáte login ve tvaru CZXXXX, který Vám byl sdělen</div>
+        <!-- Share Links -->
+        <div class="btn-share">
+          <!-- Share via Email -->
+          <a href="mailto:?subject=Podívejte se na OKbase&body=Navštivte OKbase na odkazu: https://okbase2.miele.com/" target="_blank">
+            <i class="bi bi-envelope"></i> Sdílet e-mailem
+          </a>
+    
+          <!-- Share via WhatsApp -->
+          <a href="https://wa.me/?text=Podívejte se na OKbase: https://okbase2.miele.com/" target="_blank">
+            <i class="bi bi-whatsapp"></i> Sdílet na WhatsApp
+          </a>
+    
+          <!-- Share via Facebook Messenger -->
+          <a href="https://www.facebook.com/dialog/send?link=https://okbase2.miele.com/&app_id=122948579198" target="_blank">
+            <i class="bi bi-facebook"></i> Sdílet na Facebook Messenger
+          </a>
+        </div>
+    
   </div>
   
   <!-- Modal for Detailed Information -->
