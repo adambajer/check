@@ -429,7 +429,7 @@
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
       downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
-
+      
     }
     else {
     
@@ -458,9 +458,12 @@
     const edgeInstalled = (browserFamily === 'edge');
     requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
   
+    // Portál společnosti (Vždy Neznámé)
+    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
     // Filling the download section
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
+      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/us/app/intune-company-portal/id719171358', 'App Store'));
     }
     else {
     
