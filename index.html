@@ -326,7 +326,7 @@
       case 'ios':
         headline.textContent = 'OKbase na iOS';
         document.title = 'OKbase na iOS';
-        displayIOSChecks(result, browserFamily);
+        displayIOSChecks(result, browserFamily, osVersion); // Corrected function call
         break;
       case 'windows':
         headline.textContent = 'OKbase na Windows';
@@ -426,29 +426,33 @@
     }
     downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
   }
-
-  function displayIOSChecks(result, browserFamily) {
+  function displayIOSChecks(result, browserFamily, osVersion) {
     const requirements = document.getElementById('requirements');
     const downloads = document.getElementById('downloads');
-
-    // Minimální verze iOS 16
-    const iosVersion = result.os.version ? parseInt(result.os.version.split('.')[0], 10) : 0;
+  
+    // Check if osVersion is empty and use the browser version if it's Safari
+    let iosVersion = 0;
+    if (osVersion) {
+      iosVersion = parseInt(osVersion.split('.')[0], 10);
+    } else if (isSafari(browserFamily) && isVersionFormatIOS(result.browser.version)) {
+      // If the platform is Safari and the browser version is a valid iOS version
+      iosVersion = parseInt(result.browser.version.split('.')[0], 10);
+    }
+  
+    // Minimum iOS version check (e.g., iOS 16)
     const iosVersionOK = iosVersion >= 16;
     requirements.appendChild(createCheckRow('Minimální verze iOS 16', iosVersionOK));
-
-    // Microsoft Edge
+  
+    // Microsoft Edge check
     const edgeInstalled = (browserFamily === 'edge');
     requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
-
-    // Portál společnosti (Vždy Neznámé)
-    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    // Naplnění sekce Ke stažení
+  
+    // Filling the download section
     if (!edgeInstalled) {
       downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
     }
-    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/app/microsoft-company-portal/id719171358', 'App Store'));
   }
+  
 
   function displayWindowsChecks(browserFamily) {
     const requirements = document.getElementById('requirements');
