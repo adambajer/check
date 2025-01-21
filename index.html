@@ -256,7 +256,7 @@
     <h1 id="headline" class="mb-2"></h1>
     
     <!-- Kontrola požadavků -->
-    <h2 id="requirementshead">Používáte pro zobrazení této stránky správný prohlížeč a splňujete další požadavky?</h2>
+    <h2 id="requirementshead"></h2>
     <div id="requirements" class="mb-2">
       <!-- Dynamické Check Rows budou Zde -->
     </div>
@@ -267,34 +267,9 @@
       <!-- Dynamické Download Links budou Zde -->
     </div>
     
-   <!-- Share Links -->
-   <div class="btn-share">
-           <a href="https://okbase2.miele.com" 
-             target="_blank">
-             <i class="bi bi-send"></i><br> Přejít na OKbase
-           </a>
-    <!-- Share via Email -->
-    <a href="mailto:?subject=Pod%C3%ADvejte%20se%20na%20OKbase&body=Nav%C5%A1tivte%20OKbase%20na%20odkazu%3A%20" id="shareEmail">
 
-      <i class="bi bi-envelope"></i><br> Sdílej mailem
-    </a>
-   </div>  
-  <div class="btn-share">
-    <!-- Share via WhatsApp -->
-    <a href="https://wa.me/?text=" id="shareWhatsApp">
-      <i class="bi bi-whatsapp"></i><br> Sdílej přes WhatsApp
-    </a>
-    <!-- Share via SMS -->
-    <a href="sms:?body=" id="shareSMS">
-      <i class="bi bi-chat-left-text"></i><br> Sdílej přes SMS
-    </a>
-     
-
-  </div>
-
-<div class="container">  
-Sdílej přes QR <br>   
- <img src="./qr.png" width="150px" height="150px"></div>
+ <h2>Sdílej skenováním</h2>
+  <div id="qrcode" style="width:150px; height:150px;"></div>
   <!-- Modal for Detailed Information -->
   <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -310,8 +285,7 @@ Sdílej přes QR <br>
         </div>
       </div>
     </div>
-  </div>
-
+ 
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
@@ -385,22 +359,22 @@ Sdílej přes QR <br>
     const headline = document.getElementById('headline');
     switch(platform) {
       case 'android':
-        headline.textContent = 'OKbase na Android';
-        document.title = 'OKbase na Android';
+        headline.textContent = 'OKbase na soukromém zařízení Android';
+        document.title = 'OKbase na soukromém zařízení Android';
         displayAndroidChecks(result);
         break;
       case 'ios':
-        headline.textContent = 'OKbase na iOS';
-        document.title = 'OKbase na iOS';
+        headline.textContent = 'OKbase na soukromém zařízení iOS';
+        document.title = 'OKbase na soukromém zařízení iOS';
         displayIOSChecks(result, browserFamily, osVersion); // Corrected function call
         break;
       case 'windows':
-        headline.textContent = 'OKbase na Windows';
-        document.title = 'OKbase na Windows';
+        headline.textContent = 'OKbase na soukromém zařízení Windows';
+        document.title = 'OKbase na soukromém zařízení Windows';
         displayWindowsChecks(browserFamily);
         break;
       case 'macos':
-        headline.textContent = 'OKbase na macOS';
+        headline.textContent = 'OKbase na soukromém zařízení macOS';
         document.title = 'OKbase na macOS';
         displayMacOSChecks(result, osVersion);
         break;
@@ -484,21 +458,13 @@ Sdílej přes QR <br>
 
     // Microsoft Edge
     const edgeInstalled = (result.browser.name && result.browser.name.toLowerCase() === 'edge');
-    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    requirements.appendChild(createCheckRow('Zobrazujete v Microsoft Edge', edgeInstalled));
 
-    // Portál společnosti (Vždy Neznámé)
-    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
 
-    // Naplnění sekce Ke stažení
-    if (!edgeInstalled) {
-      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
-      
-    }
-    else {
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
 
-    }
-    
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://play.google.com/store/apps/details?id=com.microsoft.windowsintune.companyportal&hl=cs', 'Google Play'));
+
+    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://play.google.com/store/apps/details?id=com.microsoft.emmx', 'Google Play'));
   }
   function displayIOSChecks(result, browserFamily, osVersion) {
     const requirements = document.getElementById('requirements');
@@ -519,18 +485,12 @@ Sdílej přes QR <br>
   
     // Microsoft Edge check
     const edgeInstalled = (browserFamily === 'edge');
-    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    requirements.appendChild(createCheckRow('Zobrazujete v Microsoft Edge', edgeInstalled));
   
-    // Portál společnosti (Vždy Neznámé)
-    requirements.appendChild(createCheckRowPortal('Portál společnosti'));
     // Filling the download section
-    if (!edgeInstalled) {
-      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
-    }
-    else {
-      downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/us/app/intune-company-portal/id719171358', 'App Store'));
-
-    }
+    downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.apple.com/us/app/intune-company-portal/id719171358', 'App Store'));
+    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://apps.apple.com/app/microsoft-edge/id1288723196', 'App Store'));
+  
   }
   
 
@@ -540,19 +500,12 @@ Sdílej přes QR <br>
 
     // Microsoft Edge
     const edgeInstalled = (browserFamily === 'edge');
-    requirements.appendChild(createCheckRow('Microsoft Edge', edgeInstalled));
+    requirements.appendChild(createCheckRow('Zobrazujete v Microsoft Edge', edgeInstalled));
 
     // Portál společnosti (Vždy Neznámé)
     //requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    // Naplnění sekce Ke stažení
-    if (!edgeInstalled) {
-      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
-    }
-    else {
-    
-      downloadshead.style = "display: none;";
-    }
+    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/edge', 'Oficiální stránka'));
+ 
     
   }
 
@@ -576,12 +529,9 @@ Sdílej přes QR <br>
 
     // Portál společnosti (Vždy Neznámé)
     requirements.appendChild(createCheckRowPortal('Portál společnosti'));
-
-    // Naplnění sekce Ke stažení
-    if (!edgeInstalled) {
-      downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
-    }
     downloads.appendChild(createDownloadLink('Portál společnosti', 'https://apps.microsoft.com/detail/9wzdncrfj3pz?amp%3Bgl=cz&hl=cs-CZ&gl=CZ', 'Oficiální stránka'));
+    downloads.appendChild(createDownloadLink('Microsoft Edge', 'https://www.microsoft.com/en-us/edge/download?', 'Oficiální stránka'));
+ 
   }
 
   /* -----------------------------------------------------------------------
@@ -675,6 +625,15 @@ Sdílej přes QR <br>
   }
 </script>
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // Get the current page URL
+  var url = window.location.href;
+  var qrcode = new QRCode(document.getElementById("qrcode"), {
+      text: url,
+      width: 150,
+      height: 150
+  });
+</script>
 </body>
 </html>
